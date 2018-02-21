@@ -14,7 +14,7 @@ var app = express();
 var mongoose = require('mongoose');
 
 //Set up default mongoose connection
-var mongoDB = 'mongodb://10.142.0.2:80/doorsdb';
+var mongoDB = 'mongodb://edwardianDoorAdmin:bensmeels@ds243798.mlab.com:43798/edwardiandoordb';
 mongoose.connect(mongoDB);
 //Get the default connection
 mongoose.connection.on('connected', function () {
