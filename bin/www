@@ -9,7 +9,7 @@ var debug = require('debug')('edwardiandoor:server');
 var https = require('https');
 var fs = require('fs');
 var forceSsl = require('express-force-ssl');
-
+const DEV = true;
 //app.use(forceSsl);
 
 /**
@@ -22,13 +22,12 @@ app.set('port', 443);
 var privateKey = fs.readFileSync('../private.key');
 var certificate = fs.readFileSync('../certificate.crt');
 var ca = fs.readFileSync('../ca_bundle.crt');
-
 var http = require('http');
+
 http.createServer(function (req, res) {
     res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
     res.end();
 }).listen(80);
-
 
 var server = https.createServer({
 	key: privateKey,

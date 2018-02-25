@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
+var hashing = require('../config/hashing');
 var userMapper = require('../mappers/userMapper');
 var path = require('path');
 
@@ -12,14 +13,6 @@ router.get('/', function(req, res, next) {
 /* GET login page. */
 router.get('/login', function(req, res, next) {
   res.render('login', { message: req.flash('loginMessage') });
-});
-
-router.get('/.well-known/acme-challenge/p-J_6BV23g8QZfYGgmLJCQKrmtEwo0LhzaHS0X6di9E', function(req, res, next) {
-	res.sendFile(path.join(__dirname, '../public', 'p-J_6BV23g8QZfYGgmLJCQKrmtEwo0LhzaHS0X6di9E'));
-});
-
-router.get('/.well-known/acme-challenge/ncIKETYfxE7mhslPhzFazetsBGalIFLvS2h6Lp6Vup8', function(req, res, next) {
-        res.sendFile(path.join(__dirname, '../public', 'ncIKETYfxE7mhslPhzFazetsBGalIFLvS2h6Lp6Vup8'));
 });
 
 /* POST login details. */
@@ -37,9 +30,9 @@ router.get('/register', function(req, res, next) {
 router.post('/register', function(req,res){
 	if (validUserParams(req.body)) {
 		if (req.body.inputPassword === req.body.inputConfirmPassword) {
-			//var {hash, salt} = hashing.createHash(req.body.inputPassword);
+			var {hash, salt} = hashing.createHash(req.body.inputPassword);
 
-			userMapper.addUser(req.body.inputEmail, req.body.inputPassword,function(error, result) {
+			userMapper.addUser(req.body.inputEmail, hash,function(error, result) {
 				if (!result) {
 					req.flash('err', 'User could not be created');
 				} else if (error) {
