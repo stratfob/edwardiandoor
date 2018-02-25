@@ -1,29 +1,29 @@
-var express = require('express');
-var router = express.Router();
-var passport = require('passport');
-var userMapper = require('../mappers/userMapper');
-var path = require('path');
+const express = require('express');
+const router = express.Router();
+const passport = require('passport');
+const userMapper = require('../mappers/userMapper');
+const path = require('path');
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', {});
+router.get('/', function (req, res, next) {
+    res.render('index', {});
 });
 
 /* GET login page. */
-router.get('/login', function(req, res, next) {
-  res.render('login', { message: req.flash('loginMessage') });
+router.get('/login', function (req, res, next) {
+    res.render('login', {message: req.flash('loginMessage')});
 });
 
 /* POST login details. */
 router.post('/login', passport.authenticate('local-login', {
-	successRedirect : '/home', // redirect to the secure profile section
-	failureRedirect : '/login', // redirect back to the login page if there is an error
-	failureFlash : true // allow flash messages
+    successRedirect: '/home', // redirect to the secure profile section
+    failureRedirect: '/login', // redirect back to the login page if there is an error
+    failureFlash: true // allow flash messages
 }));
 
 /* GET register page. */
-router.get('/register', function(req, res, next) {
-  res.render('register', {err: req.flash('err'), succ: req.flash('succ') });
+router.get('/register', function (req, res, next) {
+    res.render('register', {err: req.flash('err'), succ: req.flash('succ')});
 });
 
 router.post('/register', function(req,res){
@@ -51,7 +51,7 @@ router.post('/register', function(req,res){
 });
 
 function validUserParams(body) {
-	return (body.inputEmail && body.inputPassword && body.inputConfirmPassword);
+    return (body.inputEmail && body.inputPassword && body.inputConfirmPassword);
 }
 
 module.exports = router;

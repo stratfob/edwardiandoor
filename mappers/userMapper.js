@@ -6,7 +6,7 @@ function allUsers(callback){
 }
 
 function addUser(email,password, callback){
-	var newUser = new User({email: email,password:password});
+	const newUser = new User({email: email,password:password});
 
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(password, salt, (err, hash) => {
