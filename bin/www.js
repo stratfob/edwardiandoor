@@ -6,7 +6,7 @@ const http = require('http');
 
 const privateKey = fs.readFileSync('../private.key');
 const certificate = fs.readFileSync('../certificate.crt');
-const DEBUG = false;
+const DEBUG = true;
 
 if (DEBUG) {
     app.set('port', 3000);

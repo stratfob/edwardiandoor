@@ -5,7 +5,7 @@ var LocalStrategy = require('passport-local').Strategy;
 
 // load up the user model
 var User = require('../models/user');
-var hashing = require('./hashing');
+var bcrypt = require('bcrypt');
 
 // expose this function to our app using module.exports
 module.exports = function(passport) {
@@ -47,19 +47,17 @@ module.exports = function(passport) {
 				return done(null, false, req.flash('loginMessage', 'No user found.')); // req.flash is the way to set flashdata using connect-flash
 			}
 
-			// if the user is found but the password is wrong
-			//if (!user.validPassword(password))
 
-			var hash = hashing.generateHash(password, user.salt);
-			if(user.password!=hash){
-				return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
-			}
-
-
-
-			// all is well, return successful user
-			return done(null, user);
-
+            bcrypt.compare(password, user.password, (err, isMatch) => {
+                if (err) throw err;
+                if(isMatch){
+                    // all is well, return successful user
+                    return done(null, user);
+				}
+				else{
+                    return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
+				}
+            });
 		});
 
 	}));

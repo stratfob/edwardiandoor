@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
-var hashing = require('../config/hashing');
 var userMapper = require('../mappers/userMapper');
 var path = require('path');
 
@@ -30,9 +29,8 @@ router.get('/register', function(req, res, next) {
 router.post('/register', function(req,res){
 	if (validUserParams(req.body)) {
 		if (req.body.inputPassword === req.body.inputConfirmPassword) {
-			var {hash, salt} = hashing.createHash(req.body.inputPassword);
 
-			userMapper.addUser(req.body.inputEmail, hash,function(error, result) {
+			userMapper.addUser(req.body.inputEmail, req.body.inputPassword,function(error, result) {
 				if (!result) {
 					req.flash('err', 'User could not be created');
 				} else if (error) {

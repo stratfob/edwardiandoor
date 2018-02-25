@@ -1,28 +1,28 @@
 User = require('../models/user');
+const bcrypt = require('bcrypt');
 
 function allUsers(callback){
-	User.find(function (err,users) {
-		return callback(err,users);
-	});
+	User.find(callback);
 }
 
 function addUser(email,password, callback){
 	var newUser = new User({email: email,password:password});
-	newUser.save(function (err,product) {
-		return callback(err,product);
-	});
+
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(password, salt, (err, hash) => {
+            if (err) throw err;
+            newUser.password = hash;
+            newUser.save(callback);
+        })
+    });
 }
 
 function findUserById(id,callback){
-	User.find({ _id:id }, function(err,res){
-		return callback(err,res);
-	});
+	User.find({ _id:id }, callback);
 }
 
 function findUserByEmail(email,callback){
-	User.find({ email:email }, function(err,res){
-		return callback(err,res);
-	});
+	User.find({ email:email }, callback);
 }
 
 module.exports = {allUsers,addUser,findUserById,findUserByEmail};
