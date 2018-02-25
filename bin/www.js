@@ -1,5 +1,4 @@
 const app = require('../app');
-const debug = require('debug')('edwardiandoor:server');
 const https = require('https');
 const fs = require('fs');
 const http = require('http');

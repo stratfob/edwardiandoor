@@ -7,8 +7,8 @@ function allUsers(callback){
 }
 
 function addUser(email,password, callback){
-	var newUser = new User({email: email,password:password});
-	newUser.save(function (err,product) {
+    const newUser = new User({email: email, password: password});
+    newUser.save(function (err,product) {
 		return callback(err,product);
 	});
 }
