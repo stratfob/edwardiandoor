@@ -4,6 +4,11 @@ const Schema = mongoose.Schema;
 let userSchema = new Schema;
 
 userSchema.add({
+    username: {
+        type: String,
+        required: true,
+        unique: true
+    },
     email: {
         type: String,
         required: true,
@@ -11,6 +16,10 @@ userSchema.add({
     },
     password: {
         type: String,
+        required: true
+    },
+    knobs: {
+        type: Number,
         required: true
     }
 });
