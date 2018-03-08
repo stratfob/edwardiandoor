@@ -11,23 +11,14 @@
             <span class="navbar-text">
                 Logged in as <%=user.username%>
             </span>
+            <span class="nav-item" style="padding-left: 3rem;">
+                <a class="navbar-text" href="/home">Home</a>
+            </span>
     </div>
     <div class="mx-auto order-0">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
             <span class="navbar-toggler-icon"></span>
         </button>
-    </div>
-    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <a class="nav-link" style="padding-right: 3rem" href="/home">Back</a>
-            </li>
-            <li class="nav-item">
-                    <span class="navbar-text">
-                        Knobs: <%=user.knobs%>
-                    </span>
-            </li>
-        </ul>
     </div>
 </nav>
 
@@ -40,7 +31,7 @@
     <tr>
         <th scope="col">#</th>
         <th scope="col">Username</th>
-        <th scope="col">Knobs</th>
+        <th scope="col">Money</th>
     </tr>
     </thead>
     <tbody>
@@ -48,7 +39,7 @@
     <tr>
         <th scope="row"><%=i+1%></th>
         <td><%=result[i].username%></td>
-        <td><%=result[i].knobs%></td>
+        <td>$<%=(Math.round(result[i].money * 100) / 100).toFixed(2)%></td>
     </tr>
     <% } %>
     </tbody>

@@ -5,6 +5,53 @@
 	<title>Edwardian door - Home</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="/stylesheets/dashboard.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function(){
+            function updateTime() {
+                let currtime = Date.now();
+                let activityEnd = "<%=user.activityEnd%>";
+                if(activityEnd!="") {
+                    let ms = Date.parse(activityEnd) - currtime;
+                    if (ms < 0) {
+                        $('#time').text("");
+                    }
+                    else {
+                        let days = Math.floor(ms / (24 * 60 * 60 * 1000));
+                        let hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                        let minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+                        let seconds = Math.floor((ms % (60 * 1000)) / (1000));
+
+                        let clock = "";
+                        if (days > 0) {
+                            clock += days + ":";
+                        }
+                        if (hours > 0 || days > 0) {
+                            if (days > 0 && hours < 10) {
+                                clock += "0";
+                            }
+                            clock += hours + ":";
+                        }
+                        if (minutes < 10) {
+                                clock += "0";
+                        }
+                        clock += minutes + ":";
+                        if (seconds < 10) {
+                            clock += "0"
+                        }
+                        clock += seconds;
+                        $('#time').text(clock);
+                    }
+                }
+                else{
+                    $('#time').text("");
+                }
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
 </head>
 <body>
 
@@ -12,6 +59,9 @@
         <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
             <span class="navbar-text">
                 Logged in as <%=user.username%>
+            </span>
+            <span class="nav-item" style="padding-left: 3rem;">
+                <a class="navbar-text" href="/leaderboards/1">Leaderboards</a>
             </span>
         </div>
         <div class="mx-auto order-0">
@@ -22,11 +72,18 @@
         <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" style="padding-right: 3rem;" href="/leaderboards/1">Leaderboards</a>
+                    <span style="padding-right: 3rem;" class="navbar-text">
+                        Current activity: <%=user.currentActivity%> - <span id="time"></span>
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <span style="padding-right: 3rem;" class="navbar-text">
+                        Health: <%=user.health%>/100
+                    </span>
                 </li>
                 <li class="nav-item">
                     <span class="navbar-text">
-                        Knobs: <%=user.knobs%>
+                        $<%=(Math.round(user.money * 100) / 100).toFixed(2)%>
                     </span>
                 </li>
             </ul>
@@ -47,7 +104,7 @@
                         <a class="nav-link" href="#">Gang</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Messages</a>
+                        <a class="nav-link" href="/reports/1">Reports</a>
                     </li>
                 </ul>
 
@@ -60,7 +117,7 @@
                                 <span class="caret"></span>
                             </a>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                <a class="dropdown-item" href="#">Shops</a>
+                                <a class="dropdown-item" href="/shops">Shops</a>
                                 <a class="dropdown-item" href="#">Docks</a>
                                 <a class="dropdown-item" href="#">Casino</a>
                             </div>
@@ -71,13 +128,20 @@
 
             <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
                 <h1>Home</h1>
+                <h3>Skills</h3><br>
+                <h5>Stealing</h5>
+                <p>Level: <%=stealingLevel%></p>
+                <p>Progress to next level:</p>
+                <div class="progress" style="width: 25%">
+                    <% if(stealingLevel===10){%>
+                    <div class="progress-bar w-100" role="progressbar"></div>
+                    <% } else { %>
+                    <div class="progress-bar" style="width:<%=percentageToNextLevel%>%" role="progressbar"></div>
+                    <% } %>
+                </div>
             </main>
         </div>
     </div>
-
-
-
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>

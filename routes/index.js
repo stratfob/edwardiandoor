@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const userMapper = require('../mappers/userMapper');
 const isLoggedIn = require('../config/utils').isLoggedIn;
+const utils = require('../config/utils');
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -21,16 +22,33 @@ router.get('/leaderboards/:pageNum', isLoggedIn, function(req,res){
             res.redirect('/home');
 		}
 		else {
+			result = result.sort(function(a,b){return b.money - a.money});
 			let numberOfPages = Math.floor(result.length/10);
-			if(result.length%20>0){numberOfPages+=1;}
+			if(result.length%10>0){numberOfPages+=1;}
             res.render('leaderboards', {user: req.user, result, pageNumber:req.params.pageNum, numberOfPages});
         }
 	});
 });
 
 router.get('/home', isLoggedIn, function(req, res) {
-    res.render('home', {user : req.user});
+	let stealingLevel = utils.getLevelFromXp(req.user.stealingSkill);
+	let nextLevelXp = utils.getXpRequiredForLevel(stealingLevel+1);
+    let currentLevelXp = utils.getXpRequiredForLevel(stealingLevel);
+    let percentageToNextLevel = (req.user.stealingSkill-currentLevelXp)/(nextLevelXp-currentLevelXp)*100;
+    res.render('home', {user : req.user, stealingLevel, percentageToNextLevel});
 });
+
+
+router.get('/shops', isLoggedIn, function(req, res) {
+    res.render('shops', {user : req.user, err: req.flash('err'), succ: req.flash('succ')});
+});
+
+router.get('/reports/:pageNum', isLoggedIn, function (req,res) {
+    let reports = req.user.reports.sort(function(a,b){return b.date - a.date});
+    let numberOfPages = Math.floor(reports.length/10);
+    if(reports.length%10>0){numberOfPages+=1;}
+	res.render('reports', {user:req.user, reports, pageNumber:req.params.pageNum, numberOfPages});
+})
 
 /* POST login details. */
 router.post('/login', lowercaseifyEmail, passport.authenticate('local-login', {

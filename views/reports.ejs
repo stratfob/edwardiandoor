@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Edwardian door - Home</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="/stylesheets/dashboard.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function(){
+            function updateTime() {
+                let currtime = Date.now();
+                let activityEnd = "<%=user.activityEnd%>";
+                if(activityEnd!="") {
+                    let ms = Date.parse(activityEnd) - currtime;
+                    if (ms < 0) {
+                        $('#time').text("");
+                    }
+                    else {
+                        let days = Math.floor(ms / (24 * 60 * 60 * 1000));
+                        let hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                        let minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+                        let seconds = Math.floor((ms % (60 * 1000)) / (1000));
+
+                        let clock = "";
+                        if (days > 0) {
+                            clock += days + ":";
+                        }
+                        if (hours > 0 || days > 0) {
+                            if (days > 0 && hours < 10) {
+                                clock += "0";
+                            }
+                            clock += hours + ":";
+                        }
+                        if (minutes < 10) {
+                            clock += "0";
+                        }
+                        clock += minutes + ":";
+                        if (seconds < 10) {
+                            clock += "0"
+                        }
+                        clock += seconds;
+                        $('#time').text(clock);
+                    }
+                }
+                else{
+                    $('#time').text("");
+                }
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+            <span class="navbar-text">
+                Logged in as <%=user.username%>
+            </span>
+        <span class="nav-item" style="padding-left: 3rem;">
+                <a class="navbar-text" href="/leaderboards/1">Leaderboards</a>
+            </span>
+    </div>
+    <div class="mx-auto order-0">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                    <span style="padding-right: 3rem;" class="navbar-text">
+                        Current activity: <%=user.currentActivity%> - <span id="time"></span>
+                    </span>
+            </li>
+            <li class="nav-item">
+                    <span style="padding-right: 3rem;" class="navbar-text">
+                        Health: <%=user.health%>/100
+                    </span>
+            </li>
+            <li class="nav-item">
+                    <span class="navbar-text">
+                        $<%=(Math.round(user.money * 100) / 100).toFixed(2)%>
+                    </span>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-sm-3 col-md-2 hidden-xs-down bg-faded sidebar">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Gang</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/reports">Reports<span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+
+            <ul class="nav nav-pills flex-column">
+
+                <li class="nav-item">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#"id="dropdownMenuLink" data-toggle="dropdown"  aria-expanded="false">
+                            Locations
+                            <span class="caret"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" href="/shops">Shops</a>
+                            <a class="dropdown-item" href="#">Docks</a>
+                            <a class="dropdown-item" href="#">Casino</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+            <h1>Reports</h1>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Contents</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for(let i = (pageNumber-1)*10; i<reports.length && i<(pageNumber-1)*10 + 10; i++){ %>
+                <tr>
+                    <th scope="row"><%=i+1%></th>
+                    <td><%=
+                            ((reports[i].date.getDate()<10)? '0':'') + reports[i].date.getDate()+ '/'+
+                            (((reports[i].date.getMonth()+1)<10)?'0':'') + (reports[i].date.getMonth()+1)+'/'+
+                            reports[i].date.getFullYear() + ', ' +
+                        ((reports[i].date.getHours()<10)?'0':'')+reports[i].date.getHours() + ':' +
+                        ((reports[i].date.getMinutes()<10)?'0':'') + reports[i].date.getMinutes();
+                        %>
+                    </td>
+                    <td><%=reports[i].contents%></td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+
+            <% if(numberOfPages>0) { %>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li class="page-item">
+                        <a id='pos' class="page-link" href="/reports/1#pos">First</a>
+                    </li>
+                    <% if(pageNumber<=1){ %>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+                    <% } else { %>
+                    <li class="page-item">
+                        <a class="page-link" href="/reports/<%=Number(pageNumber)-1%>#pos">Previous</a>
+                    </li>
+                    <% } %>
+
+                    <% switch(Number(numberOfPages)){
+                    case(1): %>
+                    <li class="page-item"><a class="page-link" href="/reports/1#pos">1</a></li>
+                    <%break;
+                    case(2): %>
+                    <li class="page-item"><a class="page-link" href="/reports/1#pos">1</a></li>
+                    <li class="page-item"><a class="page-link" href="/reports/2#pos">2</a></li>
+                    <%break;
+                    default:
+                    if(pageNumber==1){ %>
+                    <li class="page-item"><a class="page-link" href="/reports/1#pos">1</a></li>
+                    <li class="page-item"><a class="page-link" href="/reports/2#pos">2</a></li>
+                    <li class="page-item"><a class="page-link" href="/reports/3#pos">3</a></li>
+                    <% } else if(pageNumber==numberOfPages){ %>
+                    <li class="page-item"><a class="page-link" href="/reports/<%=Number(pageNumber)-2%>#pos"><%=Number(pageNumber)-2%></a></li>
+                    <li class="page-item"><a class="page-link" href="/reports/<%=Number(pageNumber)-1%>#pos"><%=Number(pageNumber)-1%></a></li>
+                    <li class="page-item"><a class="page-link" href="/reports/<%=Number(pageNumber)%>#pos"><%=Number(pageNumber)%></a></li>
+                    <% } else{ %>
+                    <li class="page-item"><a class="page-link" href="/reports/<%=Number(pageNumber)-1%>#pos"><%=Number(pageNumber)-1%></a></li>
+                    <li class="page-item"><a class="page-link" href="/reports/<%=Number(pageNumber)%>#pos"><%=Number(pageNumber)%></a></li>
+                    <li class="page-item"><a class="page-link" href="/reports/<%=Number(pageNumber)+1%>#pos"><%=Number(pageNumber)+1%></a></li>
+                    <% } %>
+                    <% } %>
+
+                    <% if (pageNumber < numberOfPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="/reports/<%=Number(pageNumber)+1%>#pos">Next</a>
+                    </li>
+                    <% } else { %>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                    <% } %>
+                    <li class="page-item">
+                        <a class="page-link" href="/reports/<%=Number(numberOfPages)%>#pos">Last</a>
+                    </li>
+                </ul>
+            </nav>
+            <% } %>
+
+        </main>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

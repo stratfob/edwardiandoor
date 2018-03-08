@@ -18,10 +18,34 @@ userSchema.add({
         type: String,
         required: true
     },
-    knobs: {
+    money: {
+        type: Number,
+        required: true
+    },
+    reports:{
+        type: [{date:Date, contents:String}]
+    },
+    weapons: {
+        type: [Schema.ObjectId]
+    },
+    items: {
+        type: [Schema.ObjectId]
+    },
+    health: {
+        type: Number,
+        required: true
+    },
+    currentActivity: {
+        type: String
+    },
+    activityEnd: {
+        type: Date
+    },
+    stealingSkill: {
         type: Number,
         required: true
     }
+
 });
 userSchema.index({
     email: 1
