@@ -95,10 +95,10 @@
             <nav class="col-sm-3 col-md-2 hidden-xs-down bg-faded sidebar">
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Home<span class="sr-only">(current)</span></a>
+                        <a class="nav-link active" href="/home">Home<span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Inventory</a>
+                        <a class="nav-link" href="/inventory">Inventory</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Gang</a>
@@ -128,17 +128,48 @@
 
             <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
                 <h1>Home</h1>
-                <h3>Skills</h3><br>
-                <h5>Stealing</h5>
-                <p>Level: <%=stealingLevel%></p>
-                <p>Progress to next level:</p>
-                <div class="progress" style="width: 25%">
-                    <% if(stealingLevel===10){%>
-                    <div class="progress-bar w-100" role="progressbar"></div>
-                    <% } else { %>
-                    <div class="progress-bar" style="width:<%=percentageToNextLevel%>%" role="progressbar"></div>
-                    <% } %>
+                <section class="row">
+                <div class="col-sm-3">
+                    <h3>Skills</h3><br>
+                    <h5>Stealing</h5>
+                    <p>Level: <%=stealingLevel%></p>
+                    <p>Progress to next level:</p>
+                    <div class="progress">
+                        <% if(stealingLevel===10){%>
+                        <div class="progress-bar w-100" role="progressbar"></div>
+                        <% } else { %>
+                        <div class="progress-bar" style="width:<%=stealingPercentage%>%" role="progressbar"></div>
+                        <% } %>
+                    </div><br><br>
+
+                    <h5>Shooting</h5>
+                    <p>Level: <%=shootingLevel%></p>
+                    <p>Progress to next level:</p>
+                    <div class="progress">
+                        <% if(shootingLevel===10){%>
+                        <div class="progress-bar w-100" role="progressbar"></div>
+                        <% } else { %>
+                        <div class="progress-bar" style="width:<%=shootingPercentage%>%" role="progressbar"></div>
+                        <% } %>
+                    </div><br><br>
+
+                    <h5>Strength</h5>
+                    <p>Level: <%=strengthLevel%></p>
+                    <p>Progress to next level:</p>
+                    <div class="progress" >
+                        <% if(strengthLevel===10){%>
+                        <div class="progress-bar w-100" role="progressbar"></div>
+                        <% } else { %>
+                        <div class="progress-bar" style="width:<%=strengthPercentage%>%" role="progressbar"></div>
+                        <% } %>
+                    </div><br><br>
                 </div>
+                <div class="col-sm-6">
+                    <h3>Activities</h3><br>
+                    <h5>Coming Soon...</h5>
+                </div>
+                </section>
+
             </main>
         </div>
     </div>

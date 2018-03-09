@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const passport = require('passport');
 const session = require('express-session');
+const weaponMapper = require('./mappers/weaponMapper');
 
 const index = require('./routes/index');
 const robbery = require('./routes/robbery');
@@ -21,6 +22,7 @@ const mongoDB = 'mongodb://localhost:27017/edwardiandoordb';
 mongoose.connect(mongoDB);
 //Get the default connection
 mongoose.connection.on('connected', function () {
+    weaponMapper.addAllWeapons(function () {});
     console.log('Mongoose default connection open to ' + mongoDB);
 });
 // If the connection throws an error

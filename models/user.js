@@ -26,10 +26,13 @@ userSchema.add({
         type: [{date:Date, contents:String}]
     },
     weapons: {
-        type: [Schema.ObjectId]
+        type: [{name:String,amount:Number}]
     },
     items: {
-        type: [Schema.ObjectId]
+        type: [String]
+    },
+    equippedWeapon: {
+        type: String
     },
     health: {
         type: Number,
@@ -42,6 +45,14 @@ userSchema.add({
         type: Date
     },
     stealingSkill: {
+        type: Number,
+        required: true
+    },
+    strengthSkill: {
+        type: Number,
+        required: true
+    },
+    shootingSkill: {
         type: Number,
         required: true
     }
