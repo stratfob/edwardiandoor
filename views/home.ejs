@@ -101,7 +101,7 @@
                         <a class="nav-link" href="/inventory">Inventory</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Gang</a>
+                        <a class="nav-link" href="/criminals/1">Criminals</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/reports/1">Reports</a>
@@ -128,6 +128,16 @@
 
             <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
                 <h1>Home</h1>
+                <% if(err && err.length > 0) { %>
+                <div class="alert alert-danger" role="alert">
+                    <%= err %>
+                </div>
+                <% } %>
+                <% if (succ && succ.length > 0) { %>
+                <div class="alert alert-success" role="alert">
+                    <%= succ %>
+                </div>
+                <% } %>
                 <section class="row">
                 <div class="col-sm-3">
                     <h3>Skills</h3><br>
@@ -164,15 +174,41 @@
                         <% } %>
                     </div><br><br>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-3">
+
+                </div>
+                <div class="col-sm-3">
                     <h3>Activities</h3><br>
-                    <h5>Coming Soon...</h5>
+                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal"
+                            data-target="#HospitalModal">Check into Hospital</button>
                 </div>
                 </section>
 
             </main>
         </div>
     </div>
+
+
+    <div id="HospitalModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p>Choose a hospital option:</p>
+                    <form action="/training/hospital" method="post">
+                        <input type="radio" name="hospitalType" value="1" checked> Heal 25 health (6 hours)<br>
+                        <input type="radio" name="hospitalType" value="2"> Heal 50 health (12 hours)<br>
+                        <input type="radio" name="hospitalType" value="3"> Heal 100 health (24 hours)<br><br>
+                        <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>

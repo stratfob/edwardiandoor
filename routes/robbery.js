@@ -1,28 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const userMapper = require('../mappers/userMapper');
+const weaponMapper = require('../mappers/weaponMapper');
 const isLoggedIn = require('../config/utils').isLoggedIn;
 const utils = require('../config/utils');
 
 
 router.post('/HW', isLoggedIn, function(req,res){
+    if(req.user.health===0){
+        req.flash('err', "You cannot start an activity when your health is 0!");
+    }
 
-    if(!req.user.currentActivity) {
+    else if(!req.user.currentActivity) {
+        let timeRequired;
         if (req.body.robberyType === "1") {
-            let timeRequired = 3600000;
-            userMapper.setCurrentActivity(req.user._id, "Robbing Hardware Store", timeRequired,
-                function(){ return resolveHardwareRobbery(1,req.user,userMapper,utils)}, function () {});
+            timeRequired = 3600000;
         }
         else if (req.body.robberyType === "2") {
-            let timeRequired = 7200000;
-            userMapper.setCurrentActivity(req.user._id, "Robbing Hardware Store", timeRequired,
-                function(){ return resolveHardwareRobbery(2,req.user,userMapper,utils)}, function () {});
+            timeRequired = 7200000;
         }
         else {
-            let timeRequired = 10800000;
-            userMapper.setCurrentActivity(req.user._id, "Robbing Hardware Store", timeRequired,
-                function(){ return resolveHardwareRobbery(3,req.user,userMapper,utils)}, function () {});
+            timeRequired = 10800000;
         }
+
+        userMapper.setCurrentActivity(req.user._id, "Robbing Hardware Store", timeRequired,
+            function(){ return resolveHardwareRobbery(Number(req.body.robberyType),req.user,userMapper,utils)}, function () {});
 
         req.flash('succ', "Crime started!");
     }
@@ -31,6 +33,172 @@ router.post('/HW', isLoggedIn, function(req,res){
     }
     res.redirect('/shops');
 });
+
+router.post('/mug',isLoggedIn, function(req,res){
+    if(req.user.health===0){
+        req.flash('err', "You cannot start an activity when your health is 0!");
+        res.redirect('/home');
+    }
+    else if(!req.user.currentActivity) {
+        let victim = req.body.victim.toString();
+        let timeRequired = 3600000;
+        userMapper.findUserByUsername(victim,function(err,vic){
+            if(err){
+                req.flash('err', err);
+                res.redirect('/home');
+            }
+            else if(vic.health === 0){
+                req.flash('err', "Target is already unconscious!");
+                res.redirect('/home');
+            }
+            else {
+                userMapper.setCurrentActivity(req.user._id, "Mugging " + vic.username, timeRequired,
+                    function () {
+                        return resolveMugging(req.user, vic, userMapper, utils);
+                    }, function () {
+                    });
+
+                req.flash('succ', "Crime started!");
+                res.redirect('/home');
+            }
+        });
+    }
+    else{
+        req.flash('err', "Activity already in progress!");
+        res.redirect('/home');
+    }
+
+});
+
+function resolveMugging(user,victim,mapper,utils){
+    let userStrength = utils.getLevelFromXp(user.strengthSkill);
+    let victimStrength = utils.getLevelFromXp(victim.strengthSkill);
+    let userShooting = utils.getLevelFromXp(user.shootingSkill);
+    let victimShooting = utils.getLevelFromXp(user.shootingSkill);
+    let userHealth = user.health;
+    let victimHealth = victim.health;
+    let userReloadTime = 0;
+    let victimReloadTime = 0;
+
+    let userWeapon = user.equippedWeapon;
+    let victimWeapon = victim.equippedWeapon;
+
+    let reportContents = "";
+    weaponMapper.getWeapon(userWeapon,function(err,UserWeapon){
+        weaponMapper.getWeapon(victimWeapon,function(err,VictimWeapon){
+            let roundNum = 1;
+            let UserShotsRemaining = UserWeapon.numberOfShots;
+            let VictimShotsRemaining = VictimWeapon.numberOfShots;
+
+            while(userHealth>0 && victimHealth>0){
+                if(UserShotsRemaining===0){
+                    //reload
+                    userReloadTime++;
+                    if(userReloadTime===UserWeapon.reloadTime){
+                        UserShotsRemaining = UserWeapon.numberOfShots;
+                        userReloadTime = 0;
+                        reportContents += (roundNum + ": " + user.username + " reloaded" + "\n");
+                    }
+                }
+
+                if(roundNum%UserWeapon.attackRate===0 && UserShotsRemaining!==0){
+                    if(UserWeapon.melee){
+                        if(Math.random()<UserWeapon.baseHitPercentage){
+                            let damage = (Math.random() *
+                                (UserWeapon.damageRange.max-UserWeapon.damageRange.min) +
+                                UserWeapon.damageRange.min);
+                            damage += damage * (0.1*userStrength);
+                            victimHealth -= damage;
+                            reportContents += (roundNum + ": " + user.username + " dealt " +
+                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + UserWeapon.name + "\n");
+                        }
+                        else{
+                            reportContents += (roundNum + ": " + user.username + " missed!" + "\n");
+                        }
+                    }
+                    else{
+                        //guns
+                        if(Math.random()<(UserWeapon.baseHitPercentage + UserWeapon.baseHitPercentage *
+                                (0.1*userShooting))){
+                            let damage = (Math.random() *
+                                (UserWeapon.damageRange.max-UserWeapon.damageRange.min) +
+                                UserWeapon.damageRange.min);
+                            victimHealth -= damage;
+                            reportContents += (roundNum + ": " + user.username + " dealt " +
+                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + UserWeapon.name + "\n");
+                        }
+                        else{
+                            reportContents += (roundNum + ": " + user.username + " missed!" + "\n");
+                        }
+                    }
+                    UserShotsRemaining--;
+                }
+
+                if(VictimShotsRemaining===0){
+                    //reload
+                    victimReloadTime++;
+                    if(victimReloadTime===VictimWeapon.reloadTime){
+                        VictimShotsRemaining = VictimWeapon.numberOfShots;
+                        victimReloadTime = 0;
+                        reportContents += (roundNum + ": " + victim.username + " reloaded" + "\n");
+                    }
+                }
+                if(roundNum%VictimWeapon.attackRate===0 && VictimShotsRemaining!==0){
+                    if(VictimWeapon.melee){
+                        if(Math.random()<VictimWeapon.baseHitPercentage){
+                            let damage = (Math.random() *
+                                (VictimWeapon.damageRange.max-VictimWeapon.damageRange.min) +
+                                VictimWeapon.damageRange.min);
+                            damage += damage * (0.1*victimStrength);
+                            userHealth -= damage;
+                            reportContents += (roundNum + ": " + victim.username + " dealt " +
+                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + VictimWeapon.name + "\n");
+                        }
+                        else{
+                            reportContents += (roundNum + ": " + victim.username + " missed!" + "\n");
+                        }
+                    }
+                    else{
+                        //guns
+                        if(Math.random()<(VictimWeapon.baseHitPercentage + VictimWeapon.baseHitPercentage *
+                            (0.1*victimShooting))){
+                            let damage = (Math.random() *
+                                (VictimWeapon.damageRange.max-VictimWeapon.damageRange.min) +
+                                VictimWeapon.damageRange.min);
+                            userHealth -= damage;
+                            reportContents += (roundNum + ": " + victim.username + " dealt " +
+                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + VictimWeapon.name + "\n");
+                        }
+                        else{
+                            reportContents += (roundNum + ": " + victim.username + " missed!" + "\n");
+                        }
+                    }
+                    VictimShotsRemaining--;
+                }
+                roundNum++;
+            }
+
+            if(userHealth>0){
+                let moneyDifference = victim.money * 0.10;
+                mapper.addReport(user._id,"Success - You successfully mugged " + victim.username +
+                    "! You stole $" + moneyDifference + "\n" + reportContents, function(){});
+                mapper.addReport(victim._id,"You were mugged by " + user.username + "! They stole $" +
+                    moneyDifference + "\n" + reportContents, function(){});
+                mapper.setMoney(user._id,user.money+moneyDifference,function(){});
+                mapper.setMoney(victim._id,victim.money-moneyDifference,function(){});
+                mapper.setHealth(victim._id,victim.health-25,function(){});
+            }
+            else{
+                mapper.addReport(user._id,"Failure - You failed to mug " + victim.username + "!\n"
+                    + reportContents, function(){});
+                mapper.addReport(victim._id,"You were mugged by " + user.username + ", but you fought them off!\n"
+                    + reportContents, function(){});
+                mapper.setHealth(user._id,user.health-25,function(){});
+            }
+
+        });
+    });
+}
 
 function resolveHardwareRobbery(robberyType, user, mapper, utilities){
     let stealLevel = utilities.getLevelFromXp(user.stealingSkill);
@@ -138,7 +306,6 @@ function resolveHardwareRobbery(robberyType, user, mapper, utilities){
     }
 
 }
-
 
 
 module.exports = router;

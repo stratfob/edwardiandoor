@@ -2,6 +2,16 @@ Weapon = require('../models/weapon');
 
 const weapons= [
     {
+        name:'Fists',
+        cost:0,
+        damageRange:{min:1,max:2},
+        melee:true,
+        attackRate:20,
+        baseHitPercentage:0.6,
+        numberOfShots:-1,
+        reloadTime:-1
+    },
+    {
         name:'Hammer',
         cost:5.00,
         damageRange:{min:4,max:6},
@@ -20,6 +30,16 @@ const weapons= [
         baseHitPercentage:0.4,
         numberOfShots:-1,
         reloadTime:-1
+    },
+    {
+        name:'.32 Pistol',
+        cost:100.00,
+        damageRange:{min:50,max:60},
+        melee:false,
+        attackRate:22,
+        baseHitPercentage:0.3,
+        numberOfShots:6,
+        reloadTime:40
     }
 ];
 
@@ -32,6 +52,10 @@ function addAllWeapons(callback) {
 }
 
 function getWeapon(name,callback){
+    if(name===null||name===undefined){
+        name='Fists';
+    }
+
     Weapon.findOne({'name':name},function(err,res) {
         return callback(err, res);
     });
@@ -48,4 +72,14 @@ function getHWWeapons(callback){
     });
 }
 
-module.exports = {addAllWeapons, getHWWeapons, getWeapon};
+function getGunWeapons(callback){
+    Weapon.find({
+        'name': { $in: [
+                ".32 Pistol"
+            ]}
+    }, function(err, results){
+        return callback(err,results);
+    });
+}
+
+module.exports = {addAllWeapons, getHWWeapons, getGunWeapons, getWeapon};

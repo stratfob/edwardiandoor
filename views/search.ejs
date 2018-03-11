@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Edwardian door - Shops</title>
+    <title>Edwardian door - Home</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="/stylesheets/dashboard.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
     <script>
         $(document).ready(function(){
             function updateTime() {
@@ -100,7 +101,7 @@
                     <a class="nav-link" href="/inventory">Inventory</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/criminals/1">Criminals</a>
+                    <a class="nav-link active" href="/criminals/1">Criminals<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/reports/1">Reports</a>
@@ -126,102 +127,92 @@
         </nav>
 
         <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-            <h1>Shops</h1>
-            <% if(err && err.length > 0) { %>
-            <div class="alert alert-danger" role="alert">
-                <%= err %>
-            </div>
-            <% } %>
-            <% if (succ && succ.length > 0) { %>
-            <div class="alert alert-success" role="alert">
-                <%= succ %>
-            </div>
+            <h1>Criminals</h1>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for(let i = (pageNumber-1)*10; i<criminals.length && i<(pageNumber-1)*10 + 10; i++){ %>
+                <tr>
+                    <th scope="row"><%=i+1%></th>
+                    <td><%=criminals[i].username%></td>
+                    <td>
+                        <% if (criminals[i].username !== user.username){ %>
+                            <form action="/robbery/mug" method="post">
+                                <input type="hidden" name="victim" value="<%=criminals[i].username%>">
+                                <button type="submit" class="btn btn-sm btn-primary">Mug</button>
+                            </form>
+                        <% } %>
+                    </td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+
+            <% if(numberOfPages>0) { %>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li class="page-item">
+                        <a id='pos' class="page-link" href="/criminals/1#pos">First</a>
+                    </li>
+                    <% if(pageNumber<=1){ %>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+                    <% } else { %>
+                    <li class="page-item">
+                        <a class="page-link" href="/criminals/<%=Number(pageNumber)-1%>#pos">Previous</a>
+                    </li>
+                    <% } %>
+
+                    <% switch(Number(numberOfPages)){
+                    case(1): %>
+                    <li class="page-item"><a class="page-link" href="/criminals/1#pos">1</a></li>
+                    <%break;
+                    case(2): %>
+                    <li class="page-item"><a class="page-link" href="/criminals/1#pos">1</a></li>
+                    <li class="page-item"><a class="page-link" href="/criminals/2#pos">2</a></li>
+                    <%break;
+                    default:
+                    if(pageNumber==1){ %>
+                    <li class="page-item"><a class="page-link" href="/criminals/1#pos">1</a></li>
+                    <li class="page-item"><a class="page-link" href="/criminals/2#pos">2</a></li>
+                    <li class="page-item"><a class="page-link" href="/criminals/3#pos">3</a></li>
+                    <% } else if(pageNumber==numberOfPages){ %>
+                    <li class="page-item"><a class="page-link" href="/criminals/<%=Number(pageNumber)-2%>#pos"><%=Number(pageNumber)-2%></a></li>
+                    <li class="page-item"><a class="page-link" href="/criminals/<%=Number(pageNumber)-1%>#pos"><%=Number(pageNumber)-1%></a></li>
+                    <li class="page-item"><a class="page-link" href="/criminals/<%=Number(pageNumber)%>#pos"><%=Number(pageNumber)%></a></li>
+                    <% } else{ %>
+                    <li class="page-item"><a class="page-link" href="/criminals/<%=Number(pageNumber)-1%>#pos"><%=Number(pageNumber)-1%></a></li>
+                    <li class="page-item"><a class="page-link" href="/criminals/<%=Number(pageNumber)%>#pos"><%=Number(pageNumber)%></a></li>
+                    <li class="page-item"><a class="page-link" href="/criminals/<%=Number(pageNumber)+1%>#pos"><%=Number(pageNumber)+1%></a></li>
+                    <% } %>
+                    <% } %>
+
+                    <% if (pageNumber < numberOfPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="/criminals/<%=Number(pageNumber)+1%>#pos">Next</a>
+                    </li>
+                    <% } else { %>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                    <% } %>
+                    <li class="page-item">
+                        <a class="page-link" href="/criminals/<%=Number(numberOfPages)%>#pos">Last</a>
+                    </li>
+                </ul>
+            </nav>
             <% } %>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="float-left">Hardware Store</h2>
-                    <button type="button" class="btn btn-danger btn-lg float-right" data-toggle="modal" data-target="#HWModal">Steal from store</button>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <% for(let i = 0; i < hwWeaponResults.length; i++){ %>
-                    <li class="list-group-item">
-                        <h5 class="float-left"><%=hwWeaponResults[i].name%> - $<%=hwWeaponResults[i].cost%></h5>
-                        <form action="/shops/weapon" method="post">
-                            <input type="hidden" name="item" value="<%=hwWeaponResults[i].name%>">
-                            <button type="submit" class="btn btn-primary float-right">Buy</button>
-                        </form>
-                    </li>
-                    <% } %>
-                </ul>
-            </div>
-            <br>
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="float-left">Gun Shop</h2>
-                    <button type="button" class="btn btn-danger btn-lg float-right" data-toggle="modal" data-target="#GunModal">Train at Shooting Range</button>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <% for(let i = 0; i < gunWeaponResults.length; i++){ %>
-                    <li class="list-group-item">
-                        <h5 class="float-left"><%=gunWeaponResults[i].name%> - $<%=gunWeaponResults[i].cost%></h5>
-                        <form action="/shops/weapon" method="post">
-                            <input type="hidden" name="item" value="<%=gunWeaponResults[i].name%>">
-                            <button type="submit" class="btn btn-primary float-right">Buy</button>
-                        </form>
-                    </li>
-                    <% } %>
-                </ul>
-            </div>
         </main>
     </div>
 </div>
-
-
-
-<!-- Modal -->
-<div id="HWModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <p>Choose a robbery type:</p>
-                <form action="/robbery/HW" method="post">
-                    <input type="radio" name="robberyType" value="1" checked> Steal small items<br>
-                    <input type="radio" name="robberyType" value="2"> Steal small tools<br>
-                    <input type="radio" name="robberyType" value="3"> Steal large tools<br><br>
-                    <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<div id="GunModal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <p>Choose a shooting range option:</p>
-                <form action="/training/shooting" method="post">
-                    <input type="radio" name="shootingType" value="1" checked> Spend an hour at the range with a handgun <br>
-                    <input type="radio" name="shootingType" value="2"> Spend two hours at the range with a few different guns<br>
-                    <input type="radio" name="shootingType" value="3"> Spend three hours at the range with a lot of guns<br><br>
-                    <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>

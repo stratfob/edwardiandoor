@@ -98,13 +98,13 @@
                     <a class="nav-link" href="/home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Inventory</a>
+                    <a class="nav-link" href="/inventory">Inventory</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Gang</a>
+                    <a class="nav-link" href="/criminals/1">Criminals</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="/reports">Reports<span class="sr-only">(current)</span></a>
+                    <a class="nav-link active" href="/reports/1">Reports<span class="sr-only">(current)</span></a>
                 </li>
             </ul>
 
@@ -148,7 +148,7 @@
                         ((reports[i].date.getMinutes()<10)?'0':'') + reports[i].date.getMinutes();
                         %>
                     </td>
-                    <td><%=reports[i].contents%></td>
+                    <td><pre><%=reports[i].contents%></pre></td>
                 </tr>
                 <% } %>
                 </tbody>

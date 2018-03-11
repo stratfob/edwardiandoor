@@ -100,7 +100,7 @@
                     <a class="nav-link active" href="/inventory">Inventory<span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Gang</a>
+                    <a class="nav-link" href="/criminals/1">Criminals</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/reports/1">Reports</a>
@@ -150,6 +150,8 @@
                             <input type="hidden" name="item" value="<%=user.equippedWeapon%>">
                             <button type="submit" class="btn btn-primary float-right">Unequip</button>
                         </form>
+                        <% } else { %>
+                        <h5 class="float-left">No weapon equipped</h5>
                         <% } %>
                     </li>
                 </ul>

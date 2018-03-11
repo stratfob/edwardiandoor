@@ -32,7 +32,7 @@ router.get('/leaderboards/:pageNum', isLoggedIn, function(req,res){
 });
 
 router.get('/home', isLoggedIn, function(req, res) {
-    res.render('home', {user : req.user,
+    res.render('home', {user : req.user,  err: req.flash('err'), succ: req.flash('succ'),
 		stealingLevel:utils.getLevelFromXp(req.user.stealingSkill),
 		shootingLevel:utils.getLevelFromXp(req.user.shootingSkill),
 		strengthLevel:utils.getLevelFromXp(req.user.strengthSkill),
@@ -44,14 +44,47 @@ router.get('/home', isLoggedIn, function(req, res) {
 
 
 router.get('/shops', isLoggedIn, function(req, res) {
-	weaponMapper.getHWWeapons(function(err,results){
-        res.render('shops', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), hwWeaponResults:results});
+	weaponMapper.getHWWeapons(function(err,HWResults){
+		weaponMapper.getGunWeapons(function(err1,gunResults){
+            res.render('shops', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), hwWeaponResults:HWResults,
+                gunWeaponResults:gunResults});
+		});
+
 	});
 });
 
 router.get('/inventory',isLoggedIn, function(req,res){
     res.render('inventory', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), weapons:req.user.weapons.sort()});
 });
+
+router.get('/criminals', isLoggedIn, function(req,res){
+	res.redirect('/criminals/1');
+});
+
+router.get('/criminals/:pageNum', isLoggedIn, function(req,res){
+    userMapper.allUsers(function(error,users){
+        if(error){
+            req.flash('err', 'An error occured');
+            res.redirect('/home');
+        }
+        else {
+            let criminals = users.sort(function (a, b) {return b.username - a.username});
+            let numberOfPages = Math.floor(criminals.length / 10);
+            if (criminals.length % 10 > 0) {
+                numberOfPages += 1;
+            }
+            res.render('search', {user: req.user, criminals, pageNumber: req.params.pageNum, numberOfPages});
+        }
+	});
+});
+
+router.get('/reports/:pageNum', isLoggedIn, function (req,res) {
+    let reports = req.user.reports.sort(function(a,b){return b.date - a.date});
+    let numberOfPages = Math.floor(reports.length/10);
+    if(reports.length%10>0){numberOfPages+=1;}
+    res.render('reports', {user:req.user, reports, pageNumber:req.params.pageNum, numberOfPages});
+});
+
 
 router.post('/shops/weapon',isLoggedIn,function (req,res) {
 	weaponMapper.getWeapon(req.body.item,function(err,result){
@@ -74,7 +107,7 @@ router.post('/shops/weapon',isLoggedIn,function (req,res) {
 });
 
 router.post('/equip',isLoggedIn,function(req,res){
-	if(req.user.equippedWeapon!==null){
+	if(req.user.equippedWeapon!==null && req.user.equippedWeapon!==undefined){
         req.flash('err', req.user.equippedWeapon + ' already equipped!');
 	}
 	else {
@@ -90,13 +123,6 @@ router.post('/unequip',isLoggedIn,function(req,res){
 	});
 
 });
-
-router.get('/reports/:pageNum', isLoggedIn, function (req,res) {
-    let reports = req.user.reports.sort(function(a,b){return b.date - a.date});
-    let numberOfPages = Math.floor(reports.length/10);
-    if(reports.length%10>0){numberOfPages+=1;}
-	res.render('reports', {user:req.user, reports, pageNumber:req.params.pageNum, numberOfPages});
-})
 
 /* POST login details. */
 router.post('/login', lowercaseifyEmail, passport.authenticate('local-login', {

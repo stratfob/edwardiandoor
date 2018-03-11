@@ -26,6 +26,20 @@ function setStealingSkill(userId,newSkill,callback){
     User.findOneAndUpdate({_id:userId},{stealingSkill:newSkill} , callback);
 }
 
+function setShootingSkill(userId,newSkill,callback){
+    User.findOneAndUpdate({_id:userId},{shootingSkill:newSkill} , callback);
+}
+
+function setHealth(userId,newHealth,callback){
+    if(newHealth<0){
+        newHealth=0;
+    }
+    if(newHealth>100){
+        newHealth = 100;
+    }
+    User.findOneAndUpdate({_id:userId},{health:newHealth}, callback);
+}
+
 function addReport(userId, reportContents, callback){
     let report = {"date": Date.now(), "contents": reportContents};
     User.findOneAndUpdate({_id:userId}, {$push: {reports: report}}, callback);
@@ -51,7 +65,7 @@ function addWeapon(userId, weaponName){
 
 function equipWeapon(userId, weaponName){
     User.findOne({_id:userId}, function (err,res) {
-        if(res.equippedWeapon===null) {
+        if(res.equippedWeapon===null||res.equippedWeapon===undefined) {
             let newWeapons = [];
 
             for (let i = 0; i < res.weapons.length; i++) {
@@ -91,9 +105,9 @@ function findUserById(id,callback){
 	User.find({ _id:id }, callback);
 }
 
-function findUserByEmail(email,callback){
-	User.find({ email:email }, callback);
+function findUserByUsername(username,callback){
+	User.findOne({ username:username }, callback);
 }
 
-module.exports = {allUsers,addUser,findUserById,findUserByEmail, addWeapon, setMoney, setStealingSkill, addReport,
-    equipWeapon, unequipWeapon, setCurrentActivity};
+module.exports = {allUsers,addUser,findUserById, findUserByUsername, addWeapon, setMoney, setStealingSkill,
+    setShootingSkill, setHealth, addReport, equipWeapon, unequipWeapon, setCurrentActivity};
