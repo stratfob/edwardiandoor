@@ -57,6 +57,51 @@ router.get('/inventory',isLoggedIn, function(req,res){
     res.render('inventory', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), weapons:req.user.weapons.sort()});
 });
 
+router.get('/casino',isLoggedIn,function(req,res){
+	res.render('casino',  {user : req.user, err: req.flash('err'), succ: req.flash('succ')});
+});
+
+router.post('/casino',isLoggedIn, function(req,res){
+    if(req.user.health===0){
+        req.flash('err', "You cannot start an activity when your health is 0!");
+    }
+    else if(req.user.money<req.body.betAmount){
+        req.flash('err', 'You don\'t have enough money!');
+        res.redirect('/casino');
+    }
+    else if(!req.user.currentActivity) {
+        let timeRequired = 10000;
+        userMapper.setMoney(req.user._id,req.user.money-req.body.betAmount,function(){});
+        userMapper.setCurrentActivity(req.user._id, "Spinning roulette wheel", timeRequired,
+            function(){ return resolveRoulette(Number(req.body.betAmount),req.user,req.body.rouletteOption, userMapper);}, function () {});
+        req.flash('succ', "Spinning the wheel!");
+    }
+    else{
+        req.flash('err', "Activity already in progress!");
+    }
+    res.redirect('/casino');
+});
+
+function resolveRoulette(betAmount, user, bet, mapper){
+	if(Math.random()<0.5){
+		if(bet==='red'){
+            mapper.setMoney(user._id,user.money+(betAmount*2),function(){});
+            mapper.addReport(user._id,"SUCCESS - Roulette spin came up red!", function(){});
+		}
+		else{
+            mapper.addReport(user._id,"FAILURE - Roulette spin came up red!", function(){});
+		}
+	}else{
+        if(bet==='black'){
+            mapper.setMoney(user._id,user.money+(betAmount*2),function(){});
+            mapper.addReport(user._id,"SUCCESS - Roulette spin came up black!", function(){});
+        }
+        else{
+            mapper.addReport(user._id,"FAILURE - Roulette spin came up black!", function(){});
+        }
+	}
+}
+
 router.get('/criminals', isLoggedIn, function(req,res){
 	res.redirect('/criminals/1');
 });
