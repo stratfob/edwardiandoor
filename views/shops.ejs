@@ -173,6 +173,14 @@
                     <% } %>
                 </ul>
             </div>
+            <br>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="float-left">Gym</h2>
+                    <button type="button" class="btn btn-danger btn-lg float-right" data-toggle="modal" data-target="#GymModal">Train</button>
+                </div>
+            </div>
+
         </main>
     </div>
 </div>
@@ -209,6 +217,26 @@
                     <input type="radio" name="shootingType" value="1" checked> Spend an hour at the range with a handgun <br>
                     <input type="radio" name="shootingType" value="2"> Spend two hours at the range with a few different guns<br>
                     <input type="radio" name="shootingType" value="3"> Spend three hours at the range with a lot of guns<br><br>
+                    <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="GymModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Choose a gym option:</p>
+                <form action="/training/strength" method="post">
+                    <input type="radio" name="gymType" value="1" checked> Spend an hour at the gym with light weights<br>
+                    <input type="radio" name="gymType" value="2"> Spend two hours at the gym with medium weights<br>
+                    <input type="radio" name="gymType" value="3"> Spend three hours at the gym with heavy weights<br><br>
                     <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
                 </form>
             </div>

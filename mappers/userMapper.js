@@ -30,6 +30,10 @@ function setShootingSkill(userId,newSkill,callback){
     User.findOneAndUpdate({_id:userId},{shootingSkill:newSkill} , callback);
 }
 
+function setStrengthSkill(userId,newSkill,callback){
+    User.findOneAndUpdate({_id:userId},{strengthSkill:newSkill} , callback);
+}
+
 function setHealth(userId,newHealth,callback){
     if(newHealth<0){
         newHealth=0;
@@ -110,4 +114,4 @@ function findUserByUsername(username,callback){
 }
 
 module.exports = {allUsers,addUser,findUserById, findUserByUsername, addWeapon, setMoney, setStealingSkill,
-    setShootingSkill, setHealth, addReport, equipWeapon, unequipWeapon, setCurrentActivity};
+    setShootingSkill, setStrengthSkill, setHealth, addReport, equipWeapon, unequipWeapon, setCurrentActivity};
