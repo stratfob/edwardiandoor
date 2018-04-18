@@ -49,21 +49,41 @@ function addReport(userId, reportContents, callback){
     User.findOneAndUpdate({_id:userId}, {$push: {reports: report}}, callback);
 }
 
-function addWeapon(userId, weaponName){
+function addWeapon(userId, amount, weaponName){
     User.findOne({_id:userId}, function (err,res) {
         let newWeapons = res.weapons;
         let hasWeapon = false;
         for (let i = 0; i < newWeapons.length; i++) {
             if (newWeapons[i].name === weaponName) {
                 hasWeapon = true;
-                newWeapons[i].amount++;
+                newWeapons[i].amount+=amount;
                 break;
             }
         }
         if(!hasWeapon){
-            newWeapons.push({'name':weaponName,'amount':1});
+            newWeapons.push({'name':weaponName,'amount':amount});
         }
         res.update({'weapons':newWeapons},function(){});
+    });
+}
+
+function removeWeapon(userId, amount, weaponName){
+    User.findOne({_id:userId}, function (err,res) {
+        let newWeapons = [];
+
+        for (let i = 0; i < res.weapons.length; i++) {
+            if (res.weapons[i].name === weaponName) {
+                if (res.weapons[i].amount > amount) {
+                    newWeapons.push({'name': res.weapons[i].name, 'amount': res.weapons[i].amount - amount});
+                }
+            }
+            else {
+                newWeapons.push(res.weapons[i]);
+            }
+        }
+
+        res.update({'weapons': newWeapons, 'equippedWeapon': weaponName}, function () {
+        });
     });
 }
 
@@ -91,7 +111,7 @@ function equipWeapon(userId, weaponName){
 
 function unequipWeapon(userId, weaponName, callback){
     User.findOneAndUpdate({_id:userId}, {equippedWeapon: null}, function(){
-        addWeapon(userId,weaponName);
+        addWeapon(userId,1,weaponName);
         callback();
     });
 }
@@ -114,4 +134,4 @@ function findUserByUsername(username,callback){
 }
 
 module.exports = {allUsers,addUser,findUserById, findUserByUsername, addWeapon, setMoney, setStealingSkill,
-    setShootingSkill, setStrengthSkill, setHealth, addReport, equipWeapon, unequipWeapon, setCurrentActivity};
+    setShootingSkill, removeWeapon, setStrengthSkill, setHealth, addReport, equipWeapon, unequipWeapon, setCurrentActivity};

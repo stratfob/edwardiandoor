@@ -193,7 +193,7 @@ function resolveMugging(user,victim,mapper,utils){
                     + reportContents, function(){});
                 mapper.addReport(victim._id,"You were mugged by " + user.username + ", but you fought them off!\n"
                     + reportContents, function(){});
-                mapper.setHealth(user._id,user.health-25,function(){});
+                mapper.setHealth(user._id,user.health-50,function(){});
             }
 
         });

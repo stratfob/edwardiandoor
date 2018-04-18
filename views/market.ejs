@@ -97,7 +97,7 @@
                     <a class="nav-link" href="/home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="/inventory">Inventory<span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="/inventory">Inventory</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/criminals/1">Criminals</a>
@@ -126,7 +126,7 @@
         </nav>
 
         <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-            <h1>Inventory</h1>
+            <h1>Market</h1>
             <% if(err && err.length > 0) { %>
             <div class="alert alert-danger" role="alert">
                 <%= err %>
@@ -138,45 +138,62 @@
             </div>
             <% } %>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="float-left">Equipped</h2>
+            <section class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="float-left">Items for sale</h2>
+                            <button type="button" class="btn btn-danger btn-lg float-right" data-toggle="modal" data-target="#SellModal">New</button>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <% for(let i = 0; i < listings.length; i++){ %>
+                            <li class="list-group-item">
+                                <h5 class="float-left"><%=listings[i].amount%>x <%=listings[i].name%> - $<%=listings[i].marketPrice%></h5>
+                                <form action="/market/buy" method="post">
+                                    <input type="hidden" name="item" value="<%=listings[i]._id%>">
+                                    <button type="submit" class="btn btn-primary float-right">Buy</button>
+                                    <input type="number" style="width:100px" class="float-right" min="1" max="<%=listings[i].amount%>" name="amountToBuy" value="1">
+                                </form>
+                            </li>
+                            <% } %>
+                        </ul>
+                    </div>
                 </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <% if(user.equippedWeapon){ %>
-                        <h5 class="float-left"><%=user.equippedWeapon%></h5>
-                        <form action="/unequip" method="post">
-                            <input type="hidden" name="item" value="<%=user.equippedWeapon%>">
-                            <button type="submit" class="btn btn-primary float-right">Unequip</button>
-                        </form>
-                        <% } else { %>
-                        <h5 class="float-left">No weapon equipped</h5>
-                        <% } %>
-                    </li>
-                </ul>
-            </div>
+            </section>
             <br>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="float-left">Weapons</h2>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <% for(let i = 0; i < weapons.length; i++){ %>
-                    <li class="list-group-item">
-                        <h5 class="float-left"><%=weapons[i].name%> x<%=weapons[i].amount%></h5>
-                        <form action="/equip" method="post">
-                            <input type="hidden" name="item" value="<%=weapons[i].name%>">
-                            <button type="submit" class="btn btn-primary float-right">Equip</button>
-                        </form>
-                    </li>
-                    <% } %>
-                </ul>
-            </div>
+
         </main>
     </div>
 </div>
+
+
+<div id="SellModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Make a sell order:</p>
+                <form action="/market/new" method="post">
+                    <% for(let i = 0; i<userWeapons.length; i++){ %>
+                    <input type="radio" name="itemIndex" value=<%=i%> checked><%=userWeapons[i].name%> - You own <%=userWeapons[i].amount%><br>
+                    <% } %>
+                    Amount to sell:
+                    <input type="number" min="1" name="sellAmount" value="1">
+                    <br>
+                    Price each:
+                    <input type="number" min = "0" name="price" value="1">
+                    <br>
+                    <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>

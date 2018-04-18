@@ -85,7 +85,7 @@ router.post('/casino',isLoggedIn, function(req,res){
 function resolveRoulette(betAmount, user, bet, mapper){
 	if(Math.random()<0.5){
 		if(bet==='red'){
-            mapper.setMoney(user._id,user.money+(betAmount*2),function(){});
+            mapper.setMoney(user._id,user.money+(betAmount),function(){});
             mapper.addReport(user._id,"SUCCESS - Roulette spin came up red!", function(){});
 		}
 		else{
@@ -93,7 +93,7 @@ function resolveRoulette(betAmount, user, bet, mapper){
 		}
 	}else{
         if(bet==='black'){
-            mapper.setMoney(user._id,user.money+(betAmount*2),function(){});
+            mapper.setMoney(user._id,user.money+(betAmount),function(){});
             mapper.addReport(user._id,"SUCCESS - Roulette spin came up black!", function(){});
         }
         else{
@@ -143,7 +143,7 @@ router.post('/shops/weapon',isLoggedIn,function (req,res) {
 			}
 			else{
                 userMapper.setMoney(req.user._id,req.user.money-result.cost,function(){});
-                userMapper.addWeapon(req.user._id,req.body.item,function(){});
+                userMapper.addWeapon(req.user._id,1,req.body.item);
                 req.flash('succ', req.body.item + ' purchased!');
                 res.redirect('/shops');
 			}
