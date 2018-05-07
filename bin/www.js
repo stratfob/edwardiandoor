@@ -3,14 +3,14 @@ const https = require('https');
 const fs = require('fs');
 const http = require('http');
 
-const privateKey = fs.readFileSync('../private.key');
-const certificate = fs.readFileSync('../certificate.crt');
 const DEBUG = true;
 
 if (DEBUG) {
     app.set('port', 3000);
     http.createServer(app).listen(3000);
-} else {
+} else {        
+    const privateKey = fs.readFileSync('../private.key');
+    const certificate = fs.readFileSync('../certificate.crt');
     app.set('port', 443);
     https.createServer({
         key: privateKey,
