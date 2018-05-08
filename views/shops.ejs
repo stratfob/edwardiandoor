@@ -174,6 +174,24 @@
                 </ul>
             </div>
             <br>
+              <div class="card">
+                <div class="card-header">
+                    <h2 class="float-left">Armour Shop</h2>                    
+                </div>
+                <ul class="list-group list-group-flush">
+                    <% for(let i = 0; i < armourResults.length; i++){ %>
+                    <li class="list-group-item">
+                        <h5 class="float-left"><%=armourResults[i].name%> - $<%=armourResults[i].cost%></h5>
+                        <form action="/shops/armour" method="post">
+                            <input type="hidden" name="item" value="<%=armourResults[i].name%>">
+                            <button type="submit" class="btn btn-primary float-right">Buy</button>
+                        </form>
+                    </li>
+                    <% } %>
+                </ul>
+            </div>
+            <br>
+            
             <div class="card">
                 <div class="card-header">
                     <h2 class="float-left">Gym</h2>

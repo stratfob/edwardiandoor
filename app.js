@@ -8,7 +8,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const session = require('express-session');
 const weaponMapper = require('./mappers/weaponMapper');
-
+const armourMapper = require('./mappers/armourMapper');
 const index = require('./routes/index');
 const robbery = require('./routes/robbery');
 const training = require('./routes/training');
@@ -25,6 +25,7 @@ mongoose.connect(mongoDB);
 //Get the default connection
 mongoose.connection.on('connected', function () {
     weaponMapper.addAllWeapons(function () {});
+    armourMapper.addAllArmours(function () {});
     console.log('Mongoose default connection open to ' + mongoDB);
 });
 // If the connection throws an error

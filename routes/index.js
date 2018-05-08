@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const userMapper = require('../mappers/userMapper');
 const weaponMapper = require('../mappers/weaponMapper');
+const armourMapper = require('../mappers/armourMapper');
 const isLoggedIn = require('../config/utils').isLoggedIn;
 const utils = require('../config/utils');
 
@@ -46,15 +47,15 @@ router.get('/home', isLoggedIn, function(req, res) {
 router.get('/shops', isLoggedIn, function(req, res) {
 	weaponMapper.getHWWeapons(function(err,HWResults){
 		weaponMapper.getGunWeapons(function(err1,gunResults){
-            res.render('shops', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), hwWeaponResults:HWResults,
-                gunWeaponResults:gunResults});
+            armourMapper.getAllArmour(function(err2,armourResults){
+                res.render('shops', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), hwWeaponResults:HWResults,gunWeaponResults:gunResults,armourResults:armourResults});
+            });            
 		});
-
 	});
 });
 
 router.get('/inventory',isLoggedIn, function(req,res){
-    res.render('inventory', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), weapons:req.user.weapons.sort()});
+    res.render('inventory', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), weapons:req.user.weapons.sort(),armours:req.user.armours.sort()});
 });
 
 router.get('/casino',isLoggedIn,function(req,res){
@@ -151,7 +152,27 @@ router.post('/shops/weapon',isLoggedIn,function (req,res) {
 	});
 });
 
-router.post('/equip',isLoggedIn,function(req,res){
+router.post('/shops/armour',isLoggedIn,function (req,res) {
+	armourMapper.getArmour(req.body.item,function(err,result){
+		if(err){
+            res.redirect('/shops');
+		}
+		else{
+			if(req.user.money<result.cost){
+                req.flash('err', 'You don\'t have enough money!');
+                res.redirect('/shops');
+			}
+			else{
+                userMapper.setMoney(req.user._id,req.user.money-result.cost,function(){});
+                userMapper.addArmour(req.user._id,1,req.body.item);
+                req.flash('succ', req.body.item + ' purchased!');
+                res.redirect('/shops');
+			}
+		}
+	});
+});
+
+router.post('/equipWeapon',isLoggedIn,function(req,res){
 	if(req.user.equippedWeapon!==null && req.user.equippedWeapon!==undefined){
         req.flash('err', req.user.equippedWeapon + ' already equipped!');
 	}
@@ -162,8 +183,26 @@ router.post('/equip',isLoggedIn,function(req,res){
 	res.redirect('/inventory');
 });
 
-router.post('/unequip',isLoggedIn,function(req,res){
+router.post('/unequipWeapon',isLoggedIn,function(req,res){
     userMapper.unequipWeapon(req.user._id,req.body.item, function(){
+        res.redirect('/inventory');
+	});
+
+});
+
+router.post('/equipArmour',isLoggedIn,function(req,res){
+	if(req.user.equippedArmour!==null && req.user.equippedArmour!==undefined){
+        req.flash('err', req.user.equippedArmour + ' already equipped!');
+	}
+	else {
+        userMapper.equipArmour(req.user._id, req.body.item);
+        req.flash('succ', req.body.item + ' equipped!');
+    }
+	res.redirect('/inventory');
+});
+
+router.post('/unequipArmour',isLoggedIn,function(req,res){
+    userMapper.unequipArmour(req.user._id,req.body.item, function(){
         res.redirect('/inventory');
 	});
 

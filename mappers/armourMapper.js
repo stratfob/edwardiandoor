@@ -3,11 +3,6 @@ Armour = require('../models/armour');
 const armours=
     [
         {
-            name: 'Naked',
-            cost: 0,
-            strength:0
-        },
-        {
             name: 'Kevlar Vest',
             cost: 500,
             strength:10
@@ -45,4 +40,4 @@ function getAllArmour(callback){
     });
 }
 
-module.exports = {addAllWeapons, getHWWeapons, getGunWeapons, getWeapon};
+module.exports = {addAllArmours, getArmour, getAllArmour};
