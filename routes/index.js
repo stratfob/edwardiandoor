@@ -54,10 +54,6 @@ router.get('/shops', isLoggedIn, function(req, res) {
 	});
 });
 
-router.get('/inventory',isLoggedIn, function(req,res){
-    res.render('inventory', {user : req.user, err: req.flash('err'), succ: req.flash('succ'), weapons:req.user.weapons.sort(),armours:req.user.armours.sort()});
-});
-
 router.get('/casino',isLoggedIn,function(req,res){
 	res.render('casino',  {user : req.user, err: req.flash('err'), succ: req.flash('succ')});
 });
@@ -144,9 +140,10 @@ router.post('/shops/weapon',isLoggedIn,function (req,res) {
 			}
 			else{
                 userMapper.setMoney(req.user._id,req.user.money-result.cost,function(){});
-                userMapper.addWeapon(req.user._id,1,req.body.item);
-                req.flash('succ', req.body.item + ' purchased!');
-                res.redirect('/shops');
+                userMapper.addWeapon(req.user._id,1,req.body.item,function(){                    
+                    req.flash('succ', req.body.item + ' purchased!');
+                    res.redirect('/shops');
+                });
 			}
 		}
 	});
@@ -164,49 +161,15 @@ router.post('/shops/armour',isLoggedIn,function (req,res) {
 			}
 			else{
                 userMapper.setMoney(req.user._id,req.user.money-result.cost,function(){});
-                userMapper.addArmour(req.user._id,1,req.body.item);
-                req.flash('succ', req.body.item + ' purchased!');
-                res.redirect('/shops');
+                userMapper.addArmour(req.user._id,1,req.body.item,function(){
+                    req.flash('succ', req.body.item + ' purchased!');
+                    res.redirect('/shops');
+                });
 			}
 		}
 	});
 });
 
-router.post('/equipWeapon',isLoggedIn,function(req,res){
-	if(req.user.equippedWeapon!==null && req.user.equippedWeapon!==undefined){
-        req.flash('err', req.user.equippedWeapon + ' already equipped!');
-	}
-	else {
-        userMapper.equipWeapon(req.user._id, req.body.item);
-        req.flash('succ', req.body.item + ' equipped!');
-    }
-	res.redirect('/inventory');
-});
-
-router.post('/unequipWeapon',isLoggedIn,function(req,res){
-    userMapper.unequipWeapon(req.user._id,req.body.item, function(){
-        res.redirect('/inventory');
-	});
-
-});
-
-router.post('/equipArmour',isLoggedIn,function(req,res){
-	if(req.user.equippedArmour!==null && req.user.equippedArmour!==undefined){
-        req.flash('err', req.user.equippedArmour + ' already equipped!');
-	}
-	else {
-        userMapper.equipArmour(req.user._id, req.body.item);
-        req.flash('succ', req.body.item + ' equipped!');
-    }
-	res.redirect('/inventory');
-});
-
-router.post('/unequipArmour',isLoggedIn,function(req,res){
-    userMapper.unequipArmour(req.user._id,req.body.item, function(){
-        res.redirect('/inventory');
-	});
-
-});
 
 /* POST login details. */
 router.post('/login', lowercaseifyEmail, passport.authenticate('local-login', {

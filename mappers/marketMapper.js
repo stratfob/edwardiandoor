@@ -22,7 +22,7 @@ function makeSale(listingId, user, seller, amount, callback) {
             if(amount<res.amount){
                 userMapper.setMoney(user._id,(user.username===result.username)?user.money:(user.money-(res.marketPrice*amount)),function(){
                     userMapper.setMoney(result._id,(user.username===result.username)?result.money:(result.money+(res.marketPrice*amount)),function(){
-                        userMapper.addWeapon(user._id,amount,res.name);
+                        userMapper.addWeapon(user._id,amount,res.name,function(){});
                         res.update({'amount': res.amount-amount}, callback);
                     });
                 });
@@ -30,7 +30,7 @@ function makeSale(listingId, user, seller, amount, callback) {
             else{
                 userMapper.setMoney(user._id,(user.username===result.username)?user.money:(user.money-(res.marketPrice*res.amount)),function(){
                     userMapper.setMoney(result._id,(user.username===result.username)?result.money:(result.money+(res.marketPrice*res.amount)),function(){
-                        userMapper.addWeapon(user._id,res.amount,res.name);
+                        userMapper.addWeapon(user._id,res.amount,res.name,function(){});
                         Market.remove({_id:listingId},callback);
                     });
                 });

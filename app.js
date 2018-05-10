@@ -13,6 +13,7 @@ const index = require('./routes/index');
 const robbery = require('./routes/robbery');
 const training = require('./routes/training');
 const market = require('./routes/market');
+const inventory = require('./routes/inventory');
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use('/', index);
 app.use('/robbery', robbery);
 app.use('/training',training);
 app.use('/market',market);
+app.use('/inventory',inventory);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
