@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userMapper = require('../mappers/userMapper');
 const weaponMapper = require('../mappers/weaponMapper');
+const armourMapper = require('../mappers/armourMapper');
 const isLoggedIn = require('../config/utils').isLoggedIn;
 const utils = require('../config/utils');
 
@@ -14,13 +15,13 @@ router.post('/HW', isLoggedIn, function(req,res){
     else if(!req.user.currentActivity) {
         let timeRequired;
         if (req.body.robberyType === "1") {
-            timeRequired = 3600000;
+            timeRequired =10;
         }
         else if (req.body.robberyType === "2") {
-            timeRequired = 7200000;
+            timeRequired = 10;
         }
         else {
-            timeRequired = 10800000;
+            timeRequired = 10;
         }
 
         userMapper.setCurrentActivity(req.user._id, "Robbing Hardware Store", timeRequired,
@@ -41,7 +42,7 @@ router.post('/mug',isLoggedIn, function(req,res){
     }
     else if(!req.user.currentActivity) {
         let victim = req.body.victim.toString();
-        let timeRequired = 3600000;
+        let timeRequired = 10;
         userMapper.findUserByUsername(victim,function(err,vic){
             if(err){
                 req.flash('err', err);
@@ -82,123 +83,153 @@ function resolveMugging(user,victim,mapper,utils){
 
     let userWeapon = user.equippedWeapon;
     let victimWeapon = victim.equippedWeapon;
-
+    let userArmourName = user.equippedArmour;
+    let victimArmourName = victim.equippedArmour;
+    
     let reportContents = "";
     weaponMapper.getWeapon(userWeapon,function(err,UserWeapon){
-        weaponMapper.getWeapon(victimWeapon,function(err,VictimWeapon){
-            let roundNum = 1;
-            let UserShotsRemaining = UserWeapon.numberOfShots;
-            let VictimShotsRemaining = VictimWeapon.numberOfShots;
+        weaponMapper.getWeapon(victimWeapon,function(err2,VictimWeapon){
+            armourMapper.getArmour(userArmourName,function(err3,userArmour){
+                armourMapper.getArmour(victimArmourName,function(err4,victimArmour){
+           
+                    let roundNum = 1;
+                    let UserShotsRemaining = UserWeapon.numberOfShots;
+                    let VictimShotsRemaining = VictimWeapon.numberOfShots;
 
-            while(userHealth>0 && victimHealth>0){
-                if(UserShotsRemaining===0){
-                    //reload
-                    userReloadTime++;
-                    if(userReloadTime===UserWeapon.reloadTime){
-                        UserShotsRemaining = UserWeapon.numberOfShots;
-                        userReloadTime = 0;
-                        reportContents += (roundNum + ": " + user.username + " reloaded" + "\n");
+                    while(userHealth>0 && victimHealth>0){
+                        if(UserShotsRemaining===0){
+                            //reload
+                            userReloadTime++;
+                            if(userReloadTime===UserWeapon.reloadTime){
+                                UserShotsRemaining = UserWeapon.numberOfShots;
+                                userReloadTime = 0;
+                                reportContents += (roundNum + ": " + user.username + " reloaded" + "\n");
+                            }
+                        }
+
+                        if(roundNum%UserWeapon.attackRate===0 && UserShotsRemaining!==0){
+                            if(UserWeapon.melee){
+                                if(Math.random()<UserWeapon.baseHitPercentage){
+                                    let damage = (Math.random() *
+                                        (UserWeapon.damageRange.max-UserWeapon.damageRange.min) +
+                                        UserWeapon.damageRange.min);
+                                    damage += damage * (0.1*userStrength);
+                                    blockStr = "";
+                                    if(victimArmour){
+                                        let blocked = damage * (0.01 * victimArmour.strength);
+                                        damage -= blocked;
+                                        blockStr =  "("+ blocked.toFixed(2) +" blocked)";
+                                    }                                    
+                                    victimHealth -= damage;
+                                    reportContents += (roundNum + ": " + user.username + " dealt " +
+                                        (Math.round(damage * 100) / 100).toFixed(2) +blockStr+" with " + UserWeapon.name + "\n");
+                                }
+                                else{
+                                    reportContents += (roundNum + ": " + user.username + " missed!" + "\n");
+                                }
+                            }
+                            else{
+                                //guns
+                                if(Math.random()<(UserWeapon.baseHitPercentage + UserWeapon.baseHitPercentage *
+                                        (0.1*userShooting))){
+                                    let damage = (Math.random() *
+                                        (UserWeapon.damageRange.max-UserWeapon.damageRange.min) +
+                                        UserWeapon.damageRange.min);
+                                        blockStr = "";
+                                    if(victimArmour){
+                                        let blocked = damage * (0.01 * victimArmour.strength);
+                                        damage -= blocked;
+                                        blockStr =  "("+ blocked.toFixed(2) +" blocked)";
+                                    }   
+                                    victimHealth -= damage;
+                                    reportContents += (roundNum + ": " + user.username + " dealt " +
+                                        (Math.round(damage * 100) / 100).toFixed(2) +blockStr+ " with " + UserWeapon.name + "\n");
+                                }
+                                else{
+                                    reportContents += (roundNum + ": " + user.username + " missed!" + "\n");
+                                }
+                            }
+                            UserShotsRemaining--;
+                        }
+
+                        if(VictimShotsRemaining===0){
+                            //reload
+                            victimReloadTime++;
+                            if(victimReloadTime===VictimWeapon.reloadTime){
+                                VictimShotsRemaining = VictimWeapon.numberOfShots;
+                                victimReloadTime = 0;
+                                reportContents += (roundNum + ": " + victim.username + " reloaded" + "\n");
+                            }
+                        }
+                        if(roundNum%VictimWeapon.attackRate===0 && VictimShotsRemaining!==0){
+                            if(VictimWeapon.melee){
+                                if(Math.random()<VictimWeapon.baseHitPercentage){
+                                    let damage = (Math.random() *
+                                        (VictimWeapon.damageRange.max-VictimWeapon.damageRange.min) +
+                                        VictimWeapon.damageRange.min);
+                                        blockStr = "";
+                                    if(userArmour){
+                                        let blocked = damage * (0.01 * userArmour.strength);
+                                        damage -= blocked;
+                                        blockStr =  "("+ blocked.toFixed(2) +" blocked)";
+                                    }                        
+                                    userHealth -= damage;
+                                    reportContents += (roundNum + ": " + victim.username + " dealt " +
+                                        (Math.round(damage * 100) / 100).toFixed(2) +blockStr+ " with " + VictimWeapon.name + "\n");
+                                }
+                                else{
+                                    reportContents += (roundNum + ": " + victim.username + " missed!" + "\n");
+                                }
+                            }
+                            else{
+                                //guns
+                                if(Math.random()<(VictimWeapon.baseHitPercentage + VictimWeapon.baseHitPercentage *
+                                    (0.1*victimShooting))){
+                                    let damage = (Math.random() *
+                                        (VictimWeapon.damageRange.max-VictimWeapon.damageRange.min) +
+                                        VictimWeapon.damageRange.min);
+                                        blockStr = "";
+                                    if(userArmour){
+                                        let blocked = damage * (0.01 * userArmour.strength);
+                                        damage -= blocked;
+                                        blockStr =  "("+ blocked.toFixed(2) +" blocked)";
+                                    }  
+                                    userHealth -= damage;
+                                    reportContents += (roundNum + ": " + victim.username + " dealt " +
+                                        (Math.round(damage * 100) / 100).toFixed(2) +blockStr+ " with " + VictimWeapon.name + "\n");
+                                }
+                                else{
+                                    reportContents += (roundNum + ": " + victim.username + " missed!" + "\n");
+                                }
+                            }
+                            VictimShotsRemaining--;
+                        }
+                        roundNum++;
                     }
-                }
 
-                if(roundNum%UserWeapon.attackRate===0 && UserShotsRemaining!==0){
-                    if(UserWeapon.melee){
-                        if(Math.random()<UserWeapon.baseHitPercentage){
-                            let damage = (Math.random() *
-                                (UserWeapon.damageRange.max-UserWeapon.damageRange.min) +
-                                UserWeapon.damageRange.min);
-                            damage += damage * (0.1*userStrength);
-                            victimHealth -= damage;
-                            reportContents += (roundNum + ": " + user.username + " dealt " +
-                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + UserWeapon.name + "\n");
-                        }
-                        else{
-                            reportContents += (roundNum + ": " + user.username + " missed!" + "\n");
-                        }
+                    if(userHealth>0){
+                        let moneyDifference = victim.money * 0.10;
+                        mapper.addReport(user._id,"Success - You successfully mugged " + victim.username +
+                            "! You stole $" + moneyDifference + "\n" + reportContents, function(){});
+                        mapper.addReport(victim._id,"You were mugged by " + user.username + "! They stole $" +
+                            moneyDifference + "\n" + reportContents, function(){});
+                        mapper.setMoney(user._id,user.money+moneyDifference,function(){});
+                        mapper.setMoney(victim._id,victim.money-moneyDifference,function(){});
+                        mapper.setHealth(victim._id,victim.health-25,function(){});
                     }
                     else{
-                        //guns
-                        if(Math.random()<(UserWeapon.baseHitPercentage + UserWeapon.baseHitPercentage *
-                                (0.1*userShooting))){
-                            let damage = (Math.random() *
-                                (UserWeapon.damageRange.max-UserWeapon.damageRange.min) +
-                                UserWeapon.damageRange.min);
-                            victimHealth -= damage;
-                            reportContents += (roundNum + ": " + user.username + " dealt " +
-                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + UserWeapon.name + "\n");
-                        }
-                        else{
-                            reportContents += (roundNum + ": " + user.username + " missed!" + "\n");
-                        }
+                        mapper.addReport(user._id,"Failure - You failed to mug " + victim.username + "!\n"
+                            + reportContents, function(){});
+                        mapper.addReport(victim._id,"You were mugged by " + user.username + ", but you fought them off!\n"
+                            + reportContents, function(){});
+                        mapper.setHealth(user._id,user.health-50,function(){});
                     }
-                    UserShotsRemaining--;
-                }
-
-                if(VictimShotsRemaining===0){
-                    //reload
-                    victimReloadTime++;
-                    if(victimReloadTime===VictimWeapon.reloadTime){
-                        VictimShotsRemaining = VictimWeapon.numberOfShots;
-                        victimReloadTime = 0;
-                        reportContents += (roundNum + ": " + victim.username + " reloaded" + "\n");
-                    }
-                }
-                if(roundNum%VictimWeapon.attackRate===0 && VictimShotsRemaining!==0){
-                    if(VictimWeapon.melee){
-                        if(Math.random()<VictimWeapon.baseHitPercentage){
-                            let damage = (Math.random() *
-                                (VictimWeapon.damageRange.max-VictimWeapon.damageRange.min) +
-                                VictimWeapon.damageRange.min);
-                            damage += damage * (0.1*victimStrength);
-                            userHealth -= damage;
-                            reportContents += (roundNum + ": " + victim.username + " dealt " +
-                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + VictimWeapon.name + "\n");
-                        }
-                        else{
-                            reportContents += (roundNum + ": " + victim.username + " missed!" + "\n");
-                        }
-                    }
-                    else{
-                        //guns
-                        if(Math.random()<(VictimWeapon.baseHitPercentage + VictimWeapon.baseHitPercentage *
-                            (0.1*victimShooting))){
-                            let damage = (Math.random() *
-                                (VictimWeapon.damageRange.max-VictimWeapon.damageRange.min) +
-                                VictimWeapon.damageRange.min);
-                            userHealth -= damage;
-                            reportContents += (roundNum + ": " + victim.username + " dealt " +
-                                (Math.round(damage * 100) / 100).toFixed(2) + " with " + VictimWeapon.name + "\n");
-                        }
-                        else{
-                            reportContents += (roundNum + ": " + victim.username + " missed!" + "\n");
-                        }
-                    }
-                    VictimShotsRemaining--;
-                }
-                roundNum++;
-            }
-
-            if(userHealth>0){
-                let moneyDifference = victim.money * 0.10;
-                mapper.addReport(user._id,"Success - You successfully mugged " + victim.username +
-                    "! You stole $" + moneyDifference + "\n" + reportContents, function(){});
-                mapper.addReport(victim._id,"You were mugged by " + user.username + "! They stole $" +
-                    moneyDifference + "\n" + reportContents, function(){});
-                mapper.setMoney(user._id,user.money+moneyDifference,function(){});
-                mapper.setMoney(victim._id,victim.money-moneyDifference,function(){});
-                mapper.setHealth(victim._id,victim.health-25,function(){});
-            }
-            else{
-                mapper.addReport(user._id,"Failure - You failed to mug " + victim.username + "!\n"
-                    + reportContents, function(){});
-                mapper.addReport(victim._id,"You were mugged by " + user.username + ", but you fought them off!\n"
-                    + reportContents, function(){});
-                mapper.setHealth(user._id,user.health-50,function(){});
-            }
-
+                });
+            });
         });
     });
 }
+
 
 function resolveHardwareRobbery(robberyType, user, mapper, utilities){
     let stealLevel = utilities.getLevelFromXp(user.stealingSkill);
@@ -226,7 +257,7 @@ function resolveHardwareRobbery(robberyType, user, mapper, utilities){
                 mapper.addReport(user._id,"SUCCESS - You successfully stole small items worth " + reward +
                     "! Your stealing skill increased by 1xp.", function(){});
             }else{
-                let jailTime = 3600000;
+                let jailTime = 1;
                 mapper.setCurrentActivity(user._id, "Jail!", jailTime, function(){}, function (){});
                 mapper.addReport(user._id,"FAILURE - You were arrested after trying to steal small items!", function(){});
             }
@@ -260,7 +291,7 @@ function resolveHardwareRobbery(robberyType, user, mapper, utilities){
                 mapper.addReport(user._id,"SUCCESS - You successfully stole a small tool worth " + reward +
                     "! Your stealing skill increased by 3xp.", function(){});
             }else{
-                let jailTime = 7200000;
+                let jailTime = 10;
                 mapper.setCurrentActivity(user._id, "Jail!", jailTime, function(){}, function (){});
                 mapper.addReport(user._id,"FAILURE - You were arrested after trying to steal small tools!", function(){});
             }
@@ -297,7 +328,7 @@ function resolveHardwareRobbery(robberyType, user, mapper, utilities){
                 mapper.addReport(user._id,"SUCCESS - You successfully stole a large tool worth " + reward +
                     "! Your stealing skill increased by 5xp.", function(){});
             }else{
-                let jailTime = 10800000;
+                let jailTime = 10;
                 mapper.setCurrentActivity(user._id, "Jail!", jailTime, function(){}, function (){});
                 mapper.addReport(user._id,"FAILURE - You were arrested after trying to steal a large tool!", function(){});
             }

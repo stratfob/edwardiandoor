@@ -8,11 +8,12 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const session = require('express-session');
 const weaponMapper = require('./mappers/weaponMapper');
-
+const armourMapper = require('./mappers/armourMapper');
 const index = require('./routes/index');
 const robbery = require('./routes/robbery');
 const training = require('./routes/training');
 const market = require('./routes/market');
+const inventory = require('./routes/inventory');
 
 const app = express();
 
@@ -25,6 +26,7 @@ mongoose.connect(mongoDB);
 //Get the default connection
 mongoose.connection.on('connected', function () {
     weaponMapper.addAllWeapons(function () {});
+    armourMapper.addAllArmours(function () {});
     console.log('Mongoose default connection open to ' + mongoDB);
 });
 // If the connection throws an error
@@ -58,6 +60,7 @@ app.use('/', index);
 app.use('/robbery', robbery);
 app.use('/training',training);
 app.use('/market',market);
+app.use('/inventory',inventory);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

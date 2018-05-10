@@ -143,10 +143,11 @@
                     <h2 class="float-left">Equipped</h2>
                 </div>
                 <ul class="list-group list-group-flush">
+                 
                     <li class="list-group-item">
                         <% if(user.equippedWeapon){ %>
                         <h5 class="float-left"><%=user.equippedWeapon%></h5>
-                        <form action="/unequip" method="post">
+                        <form action="inventory/unequipWeapon" method="post">
                             <input type="hidden" name="item" value="<%=user.equippedWeapon%>">
                             <button type="submit" class="btn btn-primary float-right">Unequip</button>
                         </form>
@@ -154,10 +155,20 @@
                         <h5 class="float-left">No weapon equipped</h5>
                         <% } %>
                     </li>
+                    <li class="list-group-item">
+                        <% if(user.equippedArmour){ %>
+                        <h5 class="float-left"><%=user.equippedArmour%></h5>
+                        <form action="inventory/unequipArmour" method="post">
+                            <input type="hidden" name="item" value="<%=user.equippedArmour%>">
+                            <button type="submit" class="btn btn-primary float-right">Unequip</button>
+                        </form>
+                        <% } else { %>
+                        <h5 class="float-left">No armour equipped</h5>
+                        <% } %>
+                    </li>
                 </ul>
             </div>
             <br>
-
             <div class="card">
                 <div class="card-header">
                     <h2 class="float-left">Weapons</h2>
@@ -166,8 +177,25 @@
                     <% for(let i = 0; i < weapons.length; i++){ %>
                     <li class="list-group-item">
                         <h5 class="float-left"><%=weapons[i].name%> x<%=weapons[i].amount%></h5>
-                        <form action="/equip" method="post">
+                        <form action="inventory/equipWeapon" method="post">
                             <input type="hidden" name="item" value="<%=weapons[i].name%>">
+                            <button type="submit" class="btn btn-primary float-right">Equip</button>
+                        </form>
+                    </li>
+                    <% } %>
+                </ul>
+            </div>
+             <br>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="float-left">Armour</h2>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <% for(let i = 0; i < armours.length; i++){ %>
+                    <li class="list-group-item">
+                        <h5 class="float-left"><%=armours[i].name%> x<%=armours[i].amount%></h5>
+                        <form action="inventory/equipArmour" method="post">
+                            <input type="hidden" name="item" value="<%=armours[i].name%>">
                             <button type="submit" class="btn btn-primary float-right">Equip</button>
                         </form>
                     </li>

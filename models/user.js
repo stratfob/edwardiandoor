@@ -28,10 +28,16 @@ userSchema.add({
     weapons: {
         type: [{name:String,amount:Number}]
     },
+    armours: {
+        type: [{name:String,amount:Number}]
+    },
     items: {
         type: [String]
     },
     equippedWeapon: {
+        type: String
+    }, 
+    equippedArmour: {
         type: String
     },
     health: {

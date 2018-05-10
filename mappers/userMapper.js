@@ -49,7 +49,7 @@ function addReport(userId, reportContents, callback){
     User.findOneAndUpdate({_id:userId}, {$push: {reports: report}}, callback);
 }
 
-function addWeapon(userId, amount, weaponName){
+function addWeapon(userId, amount, weaponName,callback){
     User.findOne({_id:userId}, function (err,res) {
         let newWeapons = res.weapons;
         let hasWeapon = false;
@@ -63,7 +63,9 @@ function addWeapon(userId, amount, weaponName){
         if(!hasWeapon){
             newWeapons.push({'name':weaponName,'amount':amount});
         }
-        res.update({'weapons':newWeapons},function(){});
+        res.update({'weapons':newWeapons},function(){
+            callback();
+        });
     });
 }
 
@@ -87,7 +89,7 @@ function removeWeapon(userId, amount, weaponName){
     });
 }
 
-function equipWeapon(userId, weaponName){
+function equipWeapon(userId, weaponName,callback){
     User.findOne({_id:userId}, function (err,res) {
         if(res.equippedWeapon===null||res.equippedWeapon===undefined) {
             let newWeapons = [];
@@ -104,6 +106,7 @@ function equipWeapon(userId, weaponName){
             }
 
             res.update({'weapons': newWeapons, 'equippedWeapon': weaponName}, function () {
+                callback();
             });
         }
     });
@@ -111,8 +114,80 @@ function equipWeapon(userId, weaponName){
 
 function unequipWeapon(userId, weaponName, callback){
     User.findOneAndUpdate({_id:userId}, {equippedWeapon: null}, function(){
-        addWeapon(userId,1,weaponName);
-        callback();
+        addWeapon(userId,1,weaponName,function(){
+            callback();
+        });
+    });
+}
+
+function addArmour(userId, amount, armourName,callback){
+    User.findOne({_id:userId}, function (err,res) {
+        let newArmours = res.armours;
+        let hasArmour = false;
+        for (let i = 0; i < newArmours.length; i++) {
+            if (newArmours[i].name === armourName) {
+                hasArmour = true;
+                newArmours[i].amount+=amount;
+                break;
+            }
+        }
+        if(!hasArmour){
+            newArmours.push({'name':armourName,'amount':amount});
+        }
+        res.update({'armours':newArmours},function(){
+            callback();
+        });
+    });
+}
+
+function removeArmour(userId, amount, armourName){
+    User.findOne({_id:userId}, function (err,res) {
+        let newArmours = [];
+
+        for (let i = 0; i < res.armours.length; i++) {
+            if (res.armours[i].name === armourName) {
+                if (res.armours[i].amount > amount) {
+                    newArmours.push({'name': res.armours[i].name, 'amount': res.armours[i].amount - amount});
+                }
+            }
+            else {
+                newArmours.push(res.armours[i]);
+            }
+        }
+
+        res.update({'armours': newArmours, 'equippedarmour': armourName}, function () {
+        });
+    });
+}
+
+function equipArmour(userId, armourName,callback){
+    User.findOne({_id:userId}, function (err,res) {
+        if(res.equippedArmour===null||res.equippedArmour===undefined) {
+            let newArmours = [];
+
+            for (let i = 0; i < res.armours.length; i++) {
+                if (res.armours[i].name === armourName) {
+                    if (res.armours[i].amount > 1) {
+                        newArmours.push({'name': res.armours[i].name, 'amount': res.armours[i].amount - 1});
+                    }
+                }
+                else {
+                    newArmours.push(res.armours[i]);
+                }
+            }
+
+            res.update({'armours': newArmours, 'equippedArmour': armourName}, function () {
+                callback();
+            });
+        }
+    });
+}
+
+function unequipArmour(userId, armourName, callback){
+    User.findOneAndUpdate({_id:userId}, {equippedArmour: null}, function(){
+        addArmour(userId,1,armourName,function(){
+            callback();
+        });        
     });
 }
 
@@ -133,5 +208,5 @@ function findUserByUsername(username,callback){
 	User.findOne({ username:username }, callback);
 }
 
-module.exports = {allUsers,addUser,findUserById, findUserByUsername, addWeapon, setMoney, setStealingSkill,
-    setShootingSkill, removeWeapon, setStrengthSkill, setHealth, addReport, equipWeapon, unequipWeapon, setCurrentActivity};
+module.exports = {allUsers,addUser,findUserById, findUserByUsername, addWeapon,addArmour, setMoney, setStealingSkill,
+    setShootingSkill, removeWeapon,removeArmour, setStrengthSkill, setHealth, addReport, equipWeapon,equipArmour, unequipWeapon,unequipArmour, setCurrentActivity};

@@ -13,13 +13,13 @@ router.post('/shooting', isLoggedIn, function(req,res){
     else if(!req.user.currentActivity) {
         let timeRequired;
         if (req.body.shootingType === "1") {
-            timeRequired = 3600000;
+            timeRequired = 1;
         }
         else if (req.body.shootingType === "2") {
-            timeRequired = 7200000;
+            timeRequired = 1;
         }
         else {
-            timeRequired = 10800000;
+            timeRequired = 1;
         }
         userMapper.setCurrentActivity(req.user._id, "At the Shooting Range", timeRequired,
             function(){ return resolveShootingRange(Number(req.body.shootingType),req.user,userMapper,utils)}, function () {});
@@ -38,13 +38,13 @@ router.post('/strength',isLoggedIn, function(req,res){
     else if(!req.user.currentActivity) {
         let timeRequired;
         if (req.body.gymType === "1") {
-            timeRequired = 3600000;
+            timeRequired = 1;
         }
         else if (req.body.gymType === "2") {
-            timeRequired = 7200000;
+            timeRequired = 1;
         }
         else {
-            timeRequired = 10800000;
+            timeRequired = 1;
         }
         userMapper.setCurrentActivity(req.user._id, "At the Gym", timeRequired,
             function(){ return resolveGym(Number(req.body.gymType),req.user,userMapper,utils)}, function () {});
@@ -64,13 +64,13 @@ router.post('/hospital',isLoggedIn, function (req,res) {
     else if(!req.user.currentActivity) {
         let timeRequired;
         if (req.body.hospitalType === "1") {
-            timeRequired = 21600000;
+            timeRequired = 1;
         }
         else if (req.body.hospitalType === "2") {
-            timeRequired = 43200000;
+            timeRequired = 1;
         }
         else {
-            timeRequired = 86400000;
+            timeRequired = 1;
         }
         userMapper.setCurrentActivity(req.user._id, "At the Hospital", timeRequired,
             function(){ return resolveHospital(Number(req.body.hospitalType),req.user,userMapper)}, function () {});
