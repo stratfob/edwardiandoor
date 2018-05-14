@@ -14,7 +14,7 @@ const robbery = require('./routes/robbery');
 const training = require('./routes/training');
 const market = require('./routes/market');
 const inventory = require('./routes/inventory');
-
+const gangs = require('./routes/gangs');
 const app = express();
 
 //Import the mongoose module
@@ -61,6 +61,7 @@ app.use('/robbery', robbery);
 app.use('/training',training);
 app.use('/market',market);
 app.use('/inventory',inventory);
+app.use('/gangs',gangs);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

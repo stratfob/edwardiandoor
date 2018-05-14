@@ -61,8 +61,11 @@ userSchema.add({
     shootingSkill: {
         type: Number,
         required: true
+    },
+    gang:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'gang' 
     }
-
 });
 userSchema.index({
     email: 1

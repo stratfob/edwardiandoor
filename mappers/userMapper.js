@@ -208,5 +208,17 @@ function findUserByUsername(username,callback){
 	User.findOne({ username:username }, callback);
 }
 
+function setUserGang(userId,gang,callback){       
+     User.findOneAndUpdate({_id:userId}, {'gang':gang},function(err,res){
+        callback(err,res);
+    });
+}
+
+function unsetUserGang(userId,gang,callback){       
+     User.findOneAndUpdate({_id:userId}, {'gang':""},function(err,res){
+        callback(err,res);
+    });
+}
+
 module.exports = {allUsers,addUser,findUserById, findUserByUsername, addWeapon,addArmour, setMoney, setStealingSkill,
-    setShootingSkill, removeWeapon,removeArmour, setStrengthSkill, setHealth, addReport, equipWeapon,equipArmour, unequipWeapon,unequipArmour, setCurrentActivity};
+    setShootingSkill, removeWeapon,removeArmour, setStrengthSkill, setHealth, addReport, equipWeapon,equipArmour, unequipWeapon,unequipArmour, setCurrentActivity,setUserGang,unsetUserGang};

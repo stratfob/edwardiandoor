@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Edwardian door - Shops</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="/stylesheets/dashboard.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function(){
+            function updateTime() {
+                let currtime = Date.now();
+                let activityEnd = "<%=user.activityEnd%>";
+                if(activityEnd!="") {
+                    let ms = Date.parse(activityEnd) - currtime;
+                    if (ms < 0) {
+                        $('#time').text("");
+                    }
+                    else {
+                        let days = Math.floor(ms / (24 * 60 * 60 * 1000));
+                        let hours = Math.floor((ms % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                        let minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+                        let seconds = Math.floor((ms % (60 * 1000)) / (1000));
+
+                        let clock = "";
+                        if (days > 0) {
+                            clock += days + ":";
+                        }
+                        if (hours > 0 || days > 0) {
+                            if (days > 0 && hours < 10) {
+                                clock += "0";
+                            }
+                            clock += hours + ":";
+                        }
+                        if (minutes < 10) {
+                            clock += "0";
+                        }
+                        clock += minutes + ":";
+                        if (seconds < 10) {
+                            clock += "0"
+                        }
+                        clock += seconds;
+                        $('#time').text(clock);
+                    }
+                }
+                else{
+                    $('#time').text("");
+                }
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+    </script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+            <span class="navbar-text">
+                Logged in as <%=user.username%>
+            </span>
+        <span class="nav-item" style="padding-left: 3rem;">
+                <a class="navbar-text" href="/leaderboards/1">Leaderboards</a>
+            </span>
+    </div>
+    <div class="mx-auto order-0">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                    <span style="padding-right: 3rem;" class="navbar-text">
+                        Current activity: <%=user.currentActivity%> - <span id="time"></span>
+                    </span>
+            </li>
+            <li class="nav-item">
+                    <span style="padding-right: 3rem;" class="navbar-text">
+                        Health: <%=user.health%>/100
+                    </span>
+            </li>
+            <li class="nav-item">
+                    <span class="navbar-text">
+                        $<%=(Math.round(user.money * 100) / 100).toFixed(2)%>
+                    </span>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-sm-3 col-md-2 hidden-xs-down bg-faded sidebar">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/inventory">Inventory<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/criminals/1">Criminals</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports/1">Reports</a>
+                </li>
+            </ul>
+
+            <ul class="nav nav-pills flex-column">
+
+                <li class="nav-item">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#"id="dropdownMenuLink" data-toggle="dropdown"  aria-expanded="false">
+                            Locations
+                            <span class="caret"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" href="/shops">Shops</a>
+                            <a class="dropdown-item" href="/market">Market</a>
+                            <a class="dropdown-item" href="/casino">Casino</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+            <h1>Gangs</h1>
+            <br>
+            <h2>Current gang: <%=userGang.name%></h2>
+            <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newGangModal">New gang</button>
+            <br>
+            <div id="newGangModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <form action="/gangs/create" method="post">                              
+                                <label>Name:</label>
+                                <input type="string" min="1" name="name">
+                                <br>
+                                <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+           
+            
+            
+            <% if(err && err.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= err %>
+            </div>
+            <% } %>
+            <% if (succ && succ.length > 0) { %>
+            <div class="alert alert-success" role="alert">
+                <%= succ %>
+            </div>
+            <% } %>
+
+             <br>
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <ul class="list-group list-group-flush">
+                    <% for(let i = 0; i < gangs.length; i++){ %>             
+                        <h5 class="float-left"><%=gangs[i].name%></h5>     
+                        <button type="button" class="btn float-right" data-toggle="modal" data-target="#joinGangModal<%=i%>">Join gang</button>      
+                        <div id="joinGangModal<%=i%>" class="modal fade" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <form action="/gangs/join/<%=gangs[i]._id%>" method="post">                              
+                                            <label>Are you sure:</label>
+                                            <button type="submit" id='submitId' class="btn btn-sm btn-primary">Go!</button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>             
+
+                    <% } %>
+                </ul>
+            </div>
+        </main>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
