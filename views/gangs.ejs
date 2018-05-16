@@ -151,11 +151,8 @@
                     </div>
 
                 </div>
-            </div>
-            
-           
-            
-            
+            </div>       
+
             <% if(err && err.length > 0) { %>
             <div class="alert alert-danger" role="alert">
                 <%= err %>
@@ -168,17 +165,20 @@
             <% } %>
 
              <br>
-            <div class="card">
-                <div class="card-header">
-                </div>
-                <ul class="list-group list-group-flush">
-                    <% for(let i = 0; i < gangs.length; i++){ %>             
-                        <h5 class="float-left"><%=gangs[i].name%></h5>     
-                        <%if(userGang&&userGang.name==gangs[i].name){%>
-                            <button type="button" class="btn btn-warning float-right" data-toggle="modal" data-target="#leaveGangModal<%=i%>">Leave gang</button>      
-                        <%}else{%>
-                        <button type="button" class="btn float-right" data-toggle="modal" data-target="#joinGangModal<%=i%>">Join gang</button>      
-                        <%}%>
+             <div class="row">
+                    <% for(let i = 0; i < gangs.length; i++){ %>           
+                        <br>
+                        <div class="card col-md-3" style="margin: 1rem;">
+                            <div class="card-body">
+                                <h5 class="card-title"><%=gangs[i].name%></h5>                            
+                                <%if(""+userGang&&userGang._id==""+gangs[i]._id){%>
+                                <button type="button" class="btn btn-warning float-right" data-toggle="modal" data-target="#leaveGangModal<%=i%>">Leave gang</button>      
+                                <%}else{%>
+                                <button type="button" class="btn float-right" data-toggle="modal" data-target="#joinGangModal<%=i%>">Join gang</button>      
+                                <%}%>
+                            </div>
+                        </div>                          
+                     
                         <div id="joinGangModal<%=i%>" class="modal fade" role="dialog">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -212,8 +212,7 @@
                         </div>   
 
                     <% } %>
-                </ul>
-            </div>
+                </div>
         </main>
     </div>
 </div>
