@@ -7,8 +7,7 @@ function getGang(name,callback){
     });
 }
 
-function getGangById(id,callback){
-   
+function getGangById(id,callback){   
     Gang.findOne({_id:id},function(err,res) {
         return callback(err, res);
     });
@@ -21,9 +20,53 @@ function getAllGangs(callback){
 }
 
 function createGang(gang,callback){
-    Gang.update({name: gang.name}, gang, {upsert: true}, function (err) {
-            callback(err);
+    const newGang = new Gang({
+        name:gang.name,
+        members:gang.members,
+        leader:gang.leader,
+        moneyPool :gang.moneyPool,
+        reports:gang.reports
     });
+    newGang.save(function(err,res){
+        callback(err,res);
+    })
 }
 
-module.exports = {getGang,getGangById, getAllGangs,createGang};
+function addMember(gangId,memberId,callback){
+    Gang.findOne({_id:gangId}, function (err,res) {
+        let newMembers = res.members;
+        newMembers.push(memberId);
+        
+        res.update({'members':newMembers},function(){
+            callback();
+        });
+    });
+}  
+
+function removeMember(gangId,memberId,callback){
+    if(gangId!=null){   
+        Gang.findOne({_id:gangId}, function (err,res) {
+            let newMembers = [];
+
+            for (let i = 0; i < res.members.length; i++) {
+                if (""+res.members[i] != ""+memberId) {
+                    newMembers.push(res.members[i]);
+                }
+            }
+            if(newMembers.length==0){
+                res.remove(function(){
+                    callback();
+                });                
+            }else{                                
+                res.update({'members': newMembers}, function(){
+                    callback();
+                });                
+            }
+        });            
+    }
+    else{
+        callback();
+    }
+}
+
+module.exports = {getGang,getGangById, getAllGangs,createGang,addMember,removeMember};

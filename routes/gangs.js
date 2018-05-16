@@ -26,18 +26,30 @@ router.post('/create',isLoggedIn, function(req,res){
             reports:[]
    }    
     
-    gangMapper.createGang(newGang,function(err,gangs){        
-        res.redirect('/gangs');
-    });    
+    gangMapper.createGang(newGang,function(err,gang){     
+        userMapper.setUserGang(req.user._id,gang._id,function(error,userResult){   
+            res.redirect('/gangs');
+        });
+    });   
     
 });
 
-router.post('/join/:gangId',isLoggedIn, function(req,res){
-        
-    userMapper.setUserGang(req.user._id,req.params.gangId,function(err,gangs){        
-        res.redirect('/gangs');
-    });    
-    
+router.post('/join/:gangId',isLoggedIn, function(req,res){        
+    userMapper.setUserGang(req.user._id,req.params.gangId,function(err,userResult){  
+        gangMapper.removeMember(req.user.gang,req.user._id,function(){
+            gangMapper.addMember(req.params.gangId,req.user._id,function(error,gangResult){
+                res.redirect('/gangs');
+            });                      
+        });
+    });       
+});
+
+router.post('/leave/:gangId',isLoggedIn, function(req,res){        
+    userMapper.setUserGang(req.user._id,null,function(err,userResult){  
+        gangMapper.removeMember(req.user.gang,req.user._id,function(){
+            res.redirect('/gangs');                   
+        });
+    });       
 });
 
 
